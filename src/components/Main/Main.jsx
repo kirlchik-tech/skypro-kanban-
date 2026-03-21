@@ -1,6 +1,7 @@
 import React from "react";
 import Column from "../Column/Column";
 
+// *ветка main*
 const Main = () => {
   const columnsData = [
     {
