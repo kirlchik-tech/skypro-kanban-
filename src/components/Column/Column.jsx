@@ -1,13 +1,14 @@
 import React from "react";
 import Card from "../Card/Card";
+import { ColumnContainer, ColumnTitle, CardsList } from "./Column.styled";
 
 const Column = ({ title, cards }) => {
   return (
-    <div className="main__column column">
-      <div className="column__title">
+    <ColumnContainer>
+      <ColumnTitle>
         <p>{title}</p>
-      </div>
-      <div className="cards">
+      </ColumnTitle>
+      <CardsList>
         {cards.map((card) => (
           <Card
             key={card.id}
@@ -16,8 +17,8 @@ const Column = ({ title, cards }) => {
             date={card.date}
           />
         ))}
-      </div>
-    </div>
+      </CardsList>
+    </ColumnContainer>
   );
 };
 

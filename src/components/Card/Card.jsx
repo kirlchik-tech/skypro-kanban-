@@ -1,26 +1,36 @@
 import React from "react";
+import {
+  CardItem,
+  CardBlock,
+  CardGroup,
+  CardTheme,
+  CardMenu,
+  CardContent,
+  CardTitle,
+  CardDate,
+} from "./Card.styled";
 
 const Card = ({ topic, title, date }) => {
   return (
-    <div className="cards__item">
-      <div className="cards__card card">
-        <div className="card__group">
-          <div className="card__theme _orange">
-            <p className="_orange">{topic}</p>
-          </div>
-          <a href="#popBrowse" target="_self">
-            <div className="card__btn">
-              <div></div>
-              <div></div>
-              <div></div>
-            </div>
+    <CardItem>
+      <CardBlock>
+        <CardGroup>
+          <CardTheme $topic={topic}>
+            {" "}
+            {/* ← $topic */}
+            <p>{topic}</p>
+          </CardTheme>
+          <CardMenu href="#popBrowse">
+            <div></div>
+            <div></div>
+            <div></div>
+          </CardMenu>
+        </CardGroup>
+        <CardContent>
+          <a href="/" target="_blank">
+            <CardTitle>{title}</CardTitle>
           </a>
-        </div>
-        <div className="card__content">
-          <a href="" target="_blank">
-            <h3 className="card__title">{title}</h3>
-          </a>
-          <div className="card__date">
+          <CardDate>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="13"
@@ -50,10 +60,10 @@ const Card = ({ topic, title, date }) => {
               </defs>
             </svg>
             <p>{date}</p>
-          </div>
-        </div>
-      </div>
-    </div>
+          </CardDate>
+        </CardContent>
+      </CardBlock>
+    </CardItem>
   );
 };
 

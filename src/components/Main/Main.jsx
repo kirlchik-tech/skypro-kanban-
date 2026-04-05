@@ -1,5 +1,7 @@
 import React from "react";
 import Column from "../Column/Column";
+import { MainContainer, MainBlock, ContentWrapper } from "./Main.styled";
+import { Container } from "../common/Layout.styled";
 
 const statusList = [
   "Без статуса",
@@ -11,10 +13,10 @@ const statusList = [
 
 const Main = ({ cards }) => {
   return (
-    <main className="main">
-      <div className="container">
-        <div className="main__block">
-          <div className="main__content">
+    <MainContainer>
+      <Container>
+        <MainBlock>
+          <ContentWrapper>
             {statusList.map((status) => (
               <Column
                 key={status}
@@ -22,10 +24,10 @@ const Main = ({ cards }) => {
                 cards={cards.filter((card) => card.status === status)}
               />
             ))}
-          </div>
-        </div>
-      </div>
-    </main>
+          </ContentWrapper>
+        </MainBlock>
+      </Container>
+    </MainContainer>
   );
 };
 
