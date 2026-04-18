@@ -1,6 +1,7 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
-const PopUser = () => {
+const PopUser = ({ logout }) => {
   return (
     <div className="pop-exit" id="popExit">
       <div className="pop-exit__container">
@@ -10,12 +11,19 @@ const PopUser = () => {
           </div>
           <form className="pop-exit__form" id="formExit" action="#">
             <div className="pop-exit__form-group">
-              <button className="pop-exit__exit-yes _hover01" id="exitYes">
-                <a href="modal/signin.html">Да, выйти</a>
+              <button
+                type="button"
+                className="pop-exit__exit-yes _hover01"
+                onClick={logout}
+              >
+                Да, выйти
               </button>
-              <button className="pop-exit__exit-no _hover03" id="exitNo">
-                <a href="main.html">Нет, остаться</a>
-              </button>
+
+              <Link to="/">
+                <button type="button" className="pop-exit__exit-no _hover03">
+                  Нет, остаться
+                </button>
+              </Link>
             </div>
           </form>
         </div>

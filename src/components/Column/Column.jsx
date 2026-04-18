@@ -1,5 +1,6 @@
 import React from "react";
 import Card from "../Card/Card";
+import { Link } from "react-router-dom";
 import { ColumnContainer, ColumnTitle, CardsList } from "./Column.styled";
 
 const Column = ({ title, cards }) => {
@@ -10,12 +11,9 @@ const Column = ({ title, cards }) => {
       </ColumnTitle>
       <CardsList>
         {cards.map((card) => (
-          <Card
-            key={card.id}
-            topic={card.topic}
-            title={card.title}
-            date={card.date}
-          />
+          <Link to={`/card/${card.id}`} key={card.id}>
+            <Card topic={card.topic} title={card.title} date={card.date} />
+          </Link>
         ))}
       </CardsList>
     </ColumnContainer>

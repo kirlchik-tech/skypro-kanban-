@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { Container } from "../common/Layout.styled";
 import {
   HeaderContainer,
@@ -29,7 +30,7 @@ const Header = () => {
           </Logo>
           <Nav>
             <NewTaskButton>
-              <a href="#popNewCard">Создать новую задачу</a>
+              <Link to="/new-card">Создать новую задачу</Link>
             </NewTaskButton>
             <UserButton href="#" onClick={togglePopup}>
               Иван Иванов
@@ -44,7 +45,7 @@ const Header = () => {
                 <input type="checkbox" className="checkbox" name="checkbox" />
               </div>
               <button type="button" className="_hover03">
-                <a href="#popExit">Выйти</a>
+                <Link to="/exit">Выйти</Link>
               </button>
             </PopupUserMenu>
           </Nav>
