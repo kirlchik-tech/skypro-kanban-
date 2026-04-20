@@ -4,6 +4,7 @@ export const HeaderContainer = styled.header`
   width: 100%;
   margin: 0 auto;
   background-color: ${({ theme }) => theme.colors.bgHeader};
+  box-shadow: 0px 1px 0px 0px rgba(0, 0, 0, 0.05);
 `;
 
 export const HeaderBlock = styled.div`
@@ -30,6 +31,7 @@ export const Nav = styled.nav`
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 20px;
 `;
 
 export const NewTaskButton = styled.button`
@@ -37,13 +39,12 @@ export const NewTaskButton = styled.button`
   height: 30px;
   border-radius: 4px;
   background-color: ${({ theme }) => theme.colors.primary};
-  color: ${({ theme }) => theme.colors.textLight};
   border: none;
   font-size: 14px;
   line-height: 1;
   font-weight: 500;
-  margin-right: 20px;
   transition: background-color 0.3s;
+  cursor: pointer;
 
   a {
     color: ${({ theme }) => theme.colors.textLight};
@@ -51,6 +52,7 @@ export const NewTaskButton = styled.button`
     width: 100%;
     height: 100%;
     line-height: 30px;
+    text-decoration: none;
   }
 
   &:hover {
@@ -66,10 +68,14 @@ export const NewTaskButton = styled.button`
     height: 40px;
     margin-right: 0;
     z-index: 3;
+
+    a {
+      line-height: 40px;
+    }
   }
 `;
 
-export const UserButton = styled.a`
+export const UserButton = styled.button`
   height: 20px;
   display: flex;
   flex-wrap: nowrap;
@@ -78,6 +84,9 @@ export const UserButton = styled.a`
   font-size: 14px;
   line-height: 20px;
   color: ${({ theme }) => theme.colors.primary};
+  background: none;
+  border: none;
+  cursor: pointer;
 
   &::after {
     content: "";
@@ -106,7 +115,6 @@ export const PopupUserMenu = styled.div`
   top: 61px;
   right: 0;
   width: 213px;
-  height: 205px;
   border-radius: 10px;
   border: 0.7px solid rgba(148, 166, 190, 0.4);
   background: #fff;
@@ -114,5 +122,27 @@ export const PopupUserMenu = styled.div`
   padding: 34px;
   text-align: center;
   z-index: 2;
-  display: ${({ $isOpen }) => ($isOpen ? "block" : "none")}; // ← $isOpen
+  display: ${({ $isOpen }) => ($isOpen ? "block" : "none")};
+
+  button {
+    width: 72px;
+    height: 30px;
+    background: transparent;
+    color: #565eef;
+    border-radius: 4px;
+    border: 1px solid #565eef;
+    cursor: pointer;
+
+    a {
+      color: #565eef;
+      text-decoration: none;
+    }
+
+    &:hover {
+      background-color: #33399b;
+      a {
+        color: #ffffff;
+      }
+    }
+  }
 `;

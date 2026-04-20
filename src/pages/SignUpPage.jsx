@@ -1,34 +1,51 @@
 import React from "react";
-import {
-  Wrapper,
-  Modal,
-  Title,
-  Form,
-  Input,
-  Button,
-  FooterText,
-  StyledLink,
-} from "./Auth.styled";
+import { useNavigate } from "react-router-dom";
+import * as S from "./Auth.styled";
 
 const SignUpPage = ({ login }) => {
-  return (
-    <Wrapper>
-      <Modal>
-        <Title>Регистрация</Title>
-        <Form>
-          <Input type="text" placeholder="Имя" />
-          <Input type="email" placeholder="Эл. почта" />
-          <Input type="password" placeholder="Пароль" />
+  const navigate = useNavigate();
 
-          <Button type="button" onClick={login}>
+  const handleRegister = (e) => {
+    e.preventDefault();
+    login();
+    navigate("/");
+  };
+
+  return (
+    <S.Wrapper>
+      <S.Modal>
+        <S.Title>Регистрация</S.Title>
+        <S.Form id="formLogUp" action="#">
+          <S.Input
+            type="text"
+            name="first-name"
+            id="first-name"
+            placeholder="Имя"
+          />
+          <S.Input
+            type="text"
+            name="login"
+            id="loginReg"
+            placeholder="Эл. почта"
+          />
+          <S.Input
+            type="password"
+            name="password"
+            id="passwordFirst"
+            placeholder="Пароль"
+          />
+          <S.Button id="SignUpEnter" onClick={handleRegister}>
             Зарегистрироваться
-          </Button>
-        </Form>
-        <FooterText>
-          Уже есть аккаунт? <StyledLink to="/login">Войдите здесь</StyledLink>
-        </FooterText>
-      </Modal>
-    </Wrapper>
+          </S.Button>
+          <S.FooterText>
+            <p>
+              Уже есть аккаунт?{" "}
+              <S.StyledLink to="/login">Войдите здесь</S.StyledLink>
+            </p>
+          </S.FooterText>
+        </S.Form>
+      </S.Modal>
+    </S.Wrapper>
   );
 };
 

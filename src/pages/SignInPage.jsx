@@ -1,33 +1,37 @@
 import React from "react";
-import {
-  Wrapper,
-  Modal,
-  Title,
-  Form,
-  Input,
-  Button,
-  FooterText,
-  StyledLink,
-} from "./Auth.styled";
+import { useNavigate } from "react-router-dom";
+import * as S from "./Auth.styled";
 
 const SignInPage = ({ login }) => {
+  const navigate = useNavigate();
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    login();
+    navigate("/");
+  };
+
   return (
-    <Wrapper>
-      <Modal>
-        <Title>Вход</Title>
-        <Form>
-          <Input type="email" placeholder="Эл. почта" />
-          <Input type="password" placeholder="Пароль" />
-          <Button type="button" onClick={login}>
-            Войти
-          </Button>
-        </Form>
-        <FooterText>
-          Нужно зарегистрироваться? <br />
-          <StyledLink to="/register">Регистрируйтесь здесь</StyledLink>
-        </FooterText>
-      </Modal>
-    </Wrapper>
+    <S.Wrapper>
+      <S.ContainerSignin>
+        <S.Modal>
+          <S.ModalBlock>
+            <S.ModalTtl>Вход</S.ModalTtl>
+            <S.ModalFormLogin id="formLogIn">
+              <S.ModalInput type="text" placeholder="Эл. почта" />
+              <S.ModalInput type="password" placeholder="Пароль" />
+              <S.ModalBtnEnter onClick={handleLogin}>Войти</S.ModalBtnEnter>
+              <S.ModalFormGroup>
+                <p>Нужно зарегистрироваться?</p>
+                <S.StyledLink to="/register">
+                  Регистрируйтесь здесь
+                </S.StyledLink>
+              </S.ModalFormGroup>
+            </S.ModalFormLogin>
+          </S.ModalBlock>
+        </S.Modal>
+      </S.ContainerSignin>
+    </S.Wrapper>
   );
 };
 

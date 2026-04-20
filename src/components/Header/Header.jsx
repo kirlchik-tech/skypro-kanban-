@@ -14,8 +14,7 @@ import {
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const togglePopup = (e) => {
-    e.preventDefault();
+  const togglePopup = () => {
     setIsOpen(!isOpen);
   };
 
@@ -24,28 +23,24 @@ const Header = () => {
       <Container>
         <HeaderBlock>
           <Logo>
-            <a href="/" target="_self">
+            <Link to="/">
               <img src="/images/logo.png" alt="logo" />
-            </a>
+            </Link>
           </Logo>
           <Nav>
             <NewTaskButton>
               <Link to="/new-card">Создать новую задачу</Link>
             </NewTaskButton>
-            <UserButton href="#" onClick={togglePopup}>
-              Иван Иванов
-            </UserButton>
+            <UserButton onClick={togglePopup}>Иван Иванов</UserButton>
             <PopupUserMenu $isOpen={isOpen}>
-              {" "}
-              {/* ← $isOpen */}
               <p className="pop-user-set__name">Иван Иванов</p>
               <p className="pop-user-set__mail">ivan.ivanov@gmail.com</p>
               <div className="pop-user-set__theme">
                 <p>Темная тема</p>
                 <input type="checkbox" className="checkbox" name="checkbox" />
               </div>
-              <button type="button" className="_hover03">
-                <Link to="/exit">Выйти</Link>
+              <button type="button">
+                <Link to="/login">Выйти</Link>
               </button>
             </PopupUserMenu>
           </Nav>
