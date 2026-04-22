@@ -1,4 +1,5 @@
 import React from "react";
+import { useModal } from "../../context/ModalContext";
 import {
   CardItem,
   CardBlock,
@@ -10,26 +11,38 @@ import {
   CardDate,
 } from "./Card.styled";
 
-const Card = ({ topic, title, date }) => {
+const Card = ({ topic, title, date, cardData }) => {
+  const { openBrowse } = useModal();
+
+  const handleCardClick = (e) => {
+    // Если кликнули на три точки, не открываем попап просмотра
+    if (e.target.closest(".card-menu")) {
+      return;
+    }
+    openBrowse(cardData);
+  };
+
+  const handleMenuClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    openBrowse(cardData);
+  };
+
   return (
-    <CardItem>
+    <CardItem onClick={handleCardClick} style={{ cursor: "pointer" }}>
       <CardBlock>
         <CardGroup>
           <CardTheme $topic={topic}>
-            {" "}
-            {/* ← $topic */}
             <p>{topic}</p>
           </CardTheme>
-          <CardMenu href="#popBrowse">
+          <CardMenu className="card-menu" href="#" onClick={handleMenuClick}>
             <div></div>
             <div></div>
             <div></div>
           </CardMenu>
         </CardGroup>
         <CardContent>
-          <a href="/" target="_blank">
-            <CardTitle>{title}</CardTitle>
-          </a>
+          <CardTitle>{title}</CardTitle>
           <CardDate>
             <svg
               xmlns="http://www.w3.org/2000/svg"

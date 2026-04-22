@@ -1,13 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as S from "./Auth.styled";
 
-const SignUpPage = ({ login }) => {
+const SignUpPage = ({ setUser }) => {
   const navigate = useNavigate();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleRegister = (e) => {
     e.preventDefault();
-    login();
+    const userData = { name: name, email: email };
+    localStorage.setItem("user", JSON.stringify(userData));
+    setUser(userData);
     navigate("/");
   };
 
@@ -15,28 +20,32 @@ const SignUpPage = ({ login }) => {
     <S.Wrapper>
       <S.Modal>
         <S.Title>Регистрация</S.Title>
-        <S.Form id="formLogUp" action="#">
+        <S.Form id="formLogUp" onSubmit={handleRegister}>
           <S.Input
             type="text"
             name="first-name"
             id="first-name"
             placeholder="Имя"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
           <S.Input
             type="text"
             name="login"
             id="loginReg"
             placeholder="Эл. почта"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <S.Input
             type="password"
             name="password"
             id="passwordFirst"
             placeholder="Пароль"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
-          <S.Button id="SignUpEnter" onClick={handleRegister}>
-            Зарегистрироваться
-          </S.Button>
+          <S.Button type="submit">Зарегистрироваться</S.Button>
           <S.FooterText>
             <p>
               Уже есть аккаунт?{" "}

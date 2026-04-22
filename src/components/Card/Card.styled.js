@@ -78,13 +78,14 @@ export const CardTheme = styled.div`
   }
 `;
 
-export const CardMenu = styled.a`
+export const CardMenu = styled.div`
   width: 24px;
   height: 24px;
   display: flex;
   align-items: center;
   justify-content: space-around;
   padding: 2px;
+  cursor: pointer;
 
   div {
     width: 4px;

@@ -1,15 +1,8 @@
 import React from "react";
 import Card from "../Card/Card";
-import { useNavigate } from "react-router-dom";
 import { ColumnContainer, ColumnTitle, CardsList } from "./Column.styled";
 
 const Column = ({ title, cards }) => {
-  const navigate = useNavigate();
-
-  const handleCardClick = (cardId) => {
-    navigate(`/card/${cardId}`);
-  };
-
   return (
     <ColumnContainer>
       <ColumnTitle>
@@ -17,13 +10,13 @@ const Column = ({ title, cards }) => {
       </ColumnTitle>
       <CardsList>
         {cards.map((card) => (
-          <div
+          <Card
             key={card.id}
-            onClick={() => handleCardClick(card.id)}
-            style={{ cursor: "pointer" }}
-          >
-            <Card topic={card.topic} title={card.title} date={card.date} />
-          </div>
+            topic={card.topic}
+            title={card.title}
+            date={card.date}
+            cardData={card}
+          />
         ))}
       </CardsList>
     </ColumnContainer>
