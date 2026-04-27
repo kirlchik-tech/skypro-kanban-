@@ -45,6 +45,7 @@ export const NewTaskButton = styled.button`
   font-weight: 500;
   transition: background-color 0.3s;
   cursor: pointer;
+  color: #ffffff; /* ← добавляем эту строку */
 
   a {
     color: ${({ theme }) => theme.colors.textLight};

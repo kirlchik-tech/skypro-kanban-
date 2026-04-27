@@ -4,13 +4,14 @@ import MainPage from "../../pages/MainPage";
 import SignInPage from "../../pages/SignInPage";
 import SignUpPage from "../../pages/SignUpPage";
 import NotFoundPage from "../../pages/NotFoundPage";
+import { isAuthenticated } from "../../services/auth";
 
-const AppRoutes = ({ user, setUser }) => {
+const AppRoutes = ({ setUser }) => {
   return (
     <Routes>
       <Route
         path="/"
-        element={user ? <MainPage /> : <Navigate to="/login" />}
+        element={isAuthenticated() ? <MainPage /> : <Navigate to="/login" />}
       />
       <Route path="/login" element={<SignInPage setUser={setUser} />} />
       <Route path="/register" element={<SignUpPage setUser={setUser} />} />

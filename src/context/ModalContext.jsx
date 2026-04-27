@@ -8,17 +8,18 @@ export const ModalProvider = ({ children }) => {
   const [isNewCardOpen, setIsNewCardOpen] = useState(false);
   const [isBrowseOpen, setIsBrowseOpen] = useState(false);
   const [isExitOpen, setIsExitOpen] = useState(false);
-  const [selectedCard, setSelectedCard] = useState(null);
+  const [currentTask, setCurrentTask] = useState(null);
 
   const openNewCard = () => setIsNewCardOpen(true);
   const closeNewCard = () => setIsNewCardOpen(false);
 
   const openBrowse = (card) => {
-    setSelectedCard(card);
+    console.log("Open browse with:", card);
+    setCurrentTask(card);
     setIsBrowseOpen(true);
   };
   const closeBrowse = () => {
-    setSelectedCard(null);
+    setCurrentTask(null);
     setIsBrowseOpen(false);
   };
 
@@ -31,7 +32,7 @@ export const ModalProvider = ({ children }) => {
         isNewCardOpen,
         isBrowseOpen,
         isExitOpen,
-        selectedCard,
+        currentTask,
         openNewCard,
         closeNewCard,
         openBrowse,

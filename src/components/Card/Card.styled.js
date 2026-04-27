@@ -122,9 +122,11 @@ export const CardDate = styled.div`
 
   p {
     margin-left: 6px;
+    font-family: "Roboto", sans-serif;
+    font-weight: 400;
     font-size: 10px;
-    line-height: 13px;
-    color: ${({ theme }) => theme.colors.textSecondary};
-    letter-spacing: 0.2px;
+    line-height: 100%;
+    letter-spacing: 1%;
+    color: #94a6be;
   }
 `;

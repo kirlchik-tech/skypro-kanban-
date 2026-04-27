@@ -1,12 +1,14 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useModal } from "../../context/ModalContext";
+import { logout } from "../../services/auth";
 
 const PopUser = () => {
   const { isExitOpen, closeExit } = useModal();
   const navigate = useNavigate();
 
   const handleExit = () => {
+    logout();
     closeExit();
     navigate("/login");
   };

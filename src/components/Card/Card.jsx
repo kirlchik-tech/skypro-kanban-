@@ -11,11 +11,19 @@ import {
   CardDate,
 } from "./Card.styled";
 
+const formatDate = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const year = date.getFullYear();
+  return `${day}.${month}.${year}`;
+};
+
 const Card = ({ topic, title, date, cardData }) => {
   const { openBrowse } = useModal();
 
   const handleCardClick = (e) => {
-    // Если кликнули на три точки, не открываем попап просмотра
     if (e.target.closest(".card-menu")) {
       return;
     }
@@ -72,7 +80,7 @@ const Card = ({ topic, title, date, cardData }) => {
                 </clipPath>
               </defs>
             </svg>
-            <p>{date}</p>
+            <p>{formatDate(date)}</p>
           </CardDate>
         </CardContent>
       </CardBlock>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Container } from "../common/Layout.styled";
 import { useModal } from "../../context/ModalContext";
 import {
@@ -15,7 +15,6 @@ import {
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { openNewCard, openExit } = useModal();
-  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
 
   const togglePopup = () => {
