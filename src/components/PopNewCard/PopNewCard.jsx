@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Calendar from "../Calendar/Calendar";
 import { useModal } from "../../context/ModalContext";
-import { addTask } from "../../services/tasks";
+import { useTasks } from "../../context/TaskContext";
 import * as S from "./PopNewCard.styled";
 
 const categories = [
@@ -10,8 +10,28 @@ const categories = [
   { name: "Copywriting", bgColor: "#E9D4FF", textColor: "#9A48F1" },
 ];
 
-const PopNewCard = ({ onTaskCreated }) => {
+const getErrorMessage = (err, defaultMessage) => {
+  if (err?.response?.data) {
+    if (typeof err.response.data === "string") {
+      return err.response.data;
+    }
+
+    if (err.response.data.message) {
+      return err.response.data.message;
+    }
+
+    if (err.response.data.error) {
+      return err.response.data.error;
+    }
+  }
+
+  return err?.message || defaultMessage;
+};
+
+const PopNewCard = () => {
   const { isNewCardOpen, closeNewCard } = useModal();
+  const { createTask } = useTasks();
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("Web Design");
@@ -20,40 +40,60 @@ const PopNewCard = ({ onTaskCreated }) => {
   const [error, setError] = useState("");
   const [titleError, setTitleError] = useState("");
 
-  // Обработчик нажатия Escape
   useEffect(() => {
-    const handleEsc = (e) => {
-      if (e.key === "Escape" && isNewCardOpen) {
+    const handleEsc = (event) => {
+      if (event.key === "Escape" && isNewCardOpen) {
         closeNewCard();
       }
     };
+
     window.addEventListener("keydown", handleEsc);
+
     return () => window.removeEventListener("keydown", handleEsc);
   }, [isNewCardOpen, closeNewCard]);
 
   if (!isNewCardOpen) return null;
+
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setCategory("Web Design");
+    setSelectedDate(null);
+    setError("");
+    setTitleError("");
+  };
+
+  const handleClose = () => {
+    resetForm();
+    closeNewCard();
+  };
 
   const handleDateSelect = (date) => {
     setSelectedDate(date);
   };
 
   const validateForm = () => {
-    let isValid = true;
+    const trimmedTitle = title.trim();
+
     setTitleError("");
     setError("");
 
-    if (!title.trim()) {
+    if (!trimmedTitle) {
       setTitleError("Введите название задачи");
-      isValid = false;
-    } else if (title.trim().length < 3) {
-      setTitleError("Название должно содержать минимум 3 символа");
-      isValid = false;
-    } else if (title.trim().length > 100) {
-      setTitleError("Название не должно превышать 100 символов");
-      isValid = false;
+      return false;
     }
 
-    return isValid;
+    if (trimmedTitle.length < 3) {
+      setTitleError("Название должно содержать минимум 3 символа");
+      return false;
+    }
+
+    if (trimmedTitle.length > 100) {
+      setTitleError("Название не должно превышать 100 символов");
+      return false;
+    }
+
+    return true;
   };
 
   const handleCreate = async () => {
@@ -65,7 +105,7 @@ const PopNewCard = ({ onTaskCreated }) => {
     const taskData = {
       title: title.trim(),
       topic: category,
-      description: description.trim() || "",
+      description: description.trim(),
       status: "Без статуса",
       date: selectedDate
         ? selectedDate.toISOString()
@@ -73,28 +113,14 @@ const PopNewCard = ({ onTaskCreated }) => {
     };
 
     try {
-      await addTask(taskData);
-      if (onTaskCreated) onTaskCreated();
+      await createTask(taskData);
+
+      resetForm();
       closeNewCard();
-      setTitle("");
-      setDescription("");
-      setSelectedDate(null);
-      setCategory("Web Design");
-      setTitleError("");
     } catch (err) {
-      let errorMessage = "Ошибка создания задачи. Попробуйте снова.";
-      if (err.response?.data) {
-        if (typeof err.response.data === "string") {
-          errorMessage = err.response.data;
-        } else if (err.response.data.message) {
-          errorMessage = err.response.data.message;
-        } else if (err.response.data.error) {
-          errorMessage = err.response.data.error;
-        }
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
-      setError(errorMessage);
+      setError(
+        getErrorMessage(err, "Ошибка создания задачи. Попробуйте снова."),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -102,8 +128,8 @@ const PopNewCard = ({ onTaskCreated }) => {
 
   return (
     <S.PopNewCard>
-      <S.PopNewCardContainer onClick={closeNewCard}>
-        <S.PopNewCardBlock onClick={(e) => e.stopPropagation()}>
+      <S.PopNewCardContainer onClick={handleClose}>
+        <S.PopNewCardBlock onClick={(event) => event.stopPropagation()}>
           <S.PopNewCardContent>
             <S.PopNewCardTtl>Создание задачи</S.PopNewCardTtl>
 
@@ -113,48 +139,56 @@ const PopNewCard = ({ onTaskCreated }) => {
               <S.PopNewCardForm>
                 <S.PopNewCardFormBlock>
                   <S.Subttl htmlFor="formTitle">Название задачи</S.Subttl>
+
                   <S.PopNewCardInput
                     type="text"
                     id="formTitle"
                     placeholder="Введите название задачи..."
                     value={title}
-                    onChange={(e) => {
-                      setTitle(e.target.value);
-                      if (titleError) setTitleError("");
-                    }}
                     disabled={isLoading}
                     style={{ borderColor: titleError ? "red" : undefined }}
+                    onChange={(event) => {
+                      setTitle(event.target.value);
+
+                      if (titleError) {
+                        setTitleError("");
+                      }
+                    }}
                   />
+
                   {titleError && <S.ErrorText>{titleError}</S.ErrorText>}
                 </S.PopNewCardFormBlock>
 
                 <S.PopNewCardFormBlock>
                   <S.Subttl htmlFor="formArea">Описание задачи</S.Subttl>
+
                   <S.PopNewCardArea
                     id="formArea"
                     placeholder="Введите описание задачи..."
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
                     disabled={isLoading}
+                    onChange={(event) => setDescription(event.target.value)}
                   />
                 </S.PopNewCardFormBlock>
               </S.PopNewCardForm>
 
               <S.CalendarWrapper>
                 <Calendar
-                  isEditable={true}
-                  onDateSelect={handleDateSelect}
+                  isEditable
                   selectedDate={selectedDate}
+                  onDateSelect={handleDateSelect}
                 />
               </S.CalendarWrapper>
             </S.PopNewCardMainContent>
 
             <S.PopNewCardCategories>
               <S.Subttl>Категория</S.Subttl>
+
               <S.CategoriesThemes>
                 {categories.map((cat) => (
                   <S.CategoriesThemeItem
                     key={cat.name}
+                    type="button"
                     $active={category === cat.name}
                     $bgColor={cat.bgColor}
                     $textColor={cat.textColor}
@@ -166,7 +200,11 @@ const PopNewCard = ({ onTaskCreated }) => {
               </S.CategoriesThemes>
             </S.PopNewCardCategories>
 
-            <S.CreateButton onClick={handleCreate} disabled={isLoading}>
+            <S.CreateButton
+              type="button"
+              onClick={handleCreate}
+              disabled={isLoading}
+            >
               {isLoading ? "Создание..." : "Создать задачу"}
             </S.CreateButton>
           </S.PopNewCardContent>

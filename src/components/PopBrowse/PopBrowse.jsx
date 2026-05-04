@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useModal } from "../../context/ModalContext";
-import { updateTask, deleteTask } from "../../services/tasks";
+import { useTasks } from "../../context/TaskContext";
 import * as S from "./PopBrowse.styled";
 
 const statuses = [
@@ -101,8 +101,9 @@ const getErrorMessage = (err, defaultMessage) => {
   return err?.message || defaultMessage;
 };
 
-const PopBrowse = ({ onTaskUpdated, onTaskDeleted }) => {
+const PopBrowse = () => {
   const { isBrowseOpen, closeBrowse, currentTask } = useModal();
+  const { editTask, removeTask } = useTasks();
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -194,7 +195,7 @@ const PopBrowse = ({ onTaskUpdated, onTaskDeleted }) => {
 
     const taskData = {
       title: title.trim(),
-      topic: currentTask.topic,
+      topic: currentTask.topic || "Web Design",
       description: description.trim(),
       status,
       date: selectedDate
@@ -203,11 +204,7 @@ const PopBrowse = ({ onTaskUpdated, onTaskDeleted }) => {
     };
 
     try {
-      await updateTask(currentTask._id, taskData);
-
-      if (onTaskUpdated) {
-        onTaskUpdated();
-      }
+      await editTask(currentTask._id, taskData);
 
       closeBrowse();
     } catch (err) {
@@ -230,11 +227,7 @@ const PopBrowse = ({ onTaskUpdated, onTaskDeleted }) => {
     setError("");
 
     try {
-      await deleteTask(currentTask._id);
-
-      if (onTaskDeleted) {
-        onTaskDeleted();
-      }
+      await removeTask(currentTask._id);
 
       closeBrowse();
     } catch (err) {

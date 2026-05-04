@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signIn, isAuthenticated } from "../services/auth";
+import { useAuth } from "../context/AuthContext";
 import * as S from "./Auth.styled";
 
 const getAuthErrorMessage = (err, fallbackMessage) => {
@@ -27,8 +27,10 @@ const getAuthErrorMessage = (err, fallbackMessage) => {
   return fallbackMessage;
 };
 
-const SignInPage = ({ setUser }) => {
+const SignInPage = () => {
   const navigate = useNavigate();
+
+  const { login: loginUser, isAuth } = useAuth();
 
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
@@ -36,10 +38,10 @@ const SignInPage = ({ setUser }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated()) {
-      navigate("/");
+    if (isAuth) {
+      navigate("/", { replace: true });
     }
-  }, [navigate]);
+  }, [isAuth, navigate]);
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -59,11 +61,7 @@ const SignInPage = ({ setUser }) => {
     setIsLoading(true);
 
     try {
-      const data = await signIn(login, password);
-
-      if (setUser) {
-        setUser(data.user);
-      }
+      await loginUser(login, password);
 
       navigate("/", { replace: true });
     } catch (err) {

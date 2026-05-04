@@ -1,16 +1,22 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useModal } from "../../context/ModalContext";
-import { logout } from "../../services/auth";
+import { useAuth } from "../../context/AuthContext";
 
 const PopUser = () => {
-  const { isExitOpen, closeExit } = useModal();
   const navigate = useNavigate();
+
+  const { isExitOpen, closeExit } = useModal();
+  const { logout } = useAuth();
 
   const handleExit = () => {
     logout();
     closeExit();
-    navigate("/login");
+    navigate("/login", { replace: true });
+  };
+
+  const handleCancel = () => {
+    closeExit();
   };
 
   if (!isExitOpen) return null;
@@ -22,25 +28,26 @@ const PopUser = () => {
           <div className="pop-exit__ttl">
             <h2>Выйти из аккаунта?</h2>
           </div>
-          <form className="pop-exit__form" id="formExit" action="#">
+
+          <div className="pop-exit__form">
             <div className="pop-exit__form-group">
               <button
+                type="button"
                 className="pop-exit__exit-yes _hover01"
                 onClick={handleExit}
               >
                 Да, выйти
               </button>
+
               <button
+                type="button"
                 className="pop-exit__exit-no _hover03"
-                onClick={(e) => {
-                  e.preventDefault();
-                  closeExit();
-                }}
+                onClick={handleCancel}
               >
                 Нет, остаться
               </button>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>

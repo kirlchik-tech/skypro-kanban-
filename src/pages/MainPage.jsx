@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Wrapper } from "../components/common/Layout.styled";
 import Header from "../components/Header/Header";
@@ -7,50 +7,48 @@ import Loader from "../components/Loader/Loader";
 import PopNewCard from "../components/PopNewCard/PopNewCard";
 import PopBrowse from "../components/PopBrowse/PopBrowse";
 import PopUser from "../components/PopUser/PopUser";
-import { getTasks } from "../services/tasks";
-import { Outlet } from "react-router-dom";
+import { useTasks } from "../context/TaskContext";
 
 const MainPage = () => {
   const navigate = useNavigate();
-  const [cards, setCards] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState("");
 
-  const loadTasks = async () => {
-    setIsLoading(true);
-    setError("");
-    try {
-      const tasks = await getTasks();
-      setCards(tasks);
-    } catch (err) {
-      console.error(err);
-      // Обработка 401 - не авторизован
-      if (err.response?.status === 401) {
-        navigate("/login");
-      } else {
-        setError(
-          err.response?.data?.message ||
-            "Не удалось загрузить задачи. Попробуйте позже.",
-        );
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { cards, isLoading, error, loadTasks } = useTasks();
 
   useEffect(() => {
-    loadTasks();
-  }, []);
+    const fetchTasks = async () => {
+      try {
+        await loadTasks();
+      } catch (err) {
+        if (err?.response?.status === 401) {
+          navigate("/login", { replace: true });
+        }
+      }
+    };
+
+    fetchTasks();
+  }, [loadTasks, navigate]);
+
+  const handleRetry = async () => {
+    try {
+      await loadTasks();
+    } catch (err) {
+      if (err?.response?.status === 401) {
+        navigate("/login", { replace: true });
+      }
+    }
+  };
 
   if (error) {
     return (
       <Wrapper>
-        <Outlet />
         <Header />
+
         <div style={{ textAlign: "center", marginTop: "50px", color: "red" }}>
           <p>{error}</p>
+
           <button
-            onClick={loadTasks}
+            type="button"
+            onClick={handleRetry}
             style={{
               marginTop: "10px",
               padding: "8px 16px",
@@ -60,6 +58,8 @@ const MainPage = () => {
             Повторить
           </button>
         </div>
+
+        <PopUser />
       </Wrapper>
     );
   }
@@ -68,8 +68,8 @@ const MainPage = () => {
     <Wrapper>
       <Header />
       {isLoading ? <Loader /> : <Main cards={cards} />}
-      <PopNewCard onTaskCreated={loadTasks} />
-      <PopBrowse onTaskUpdated={loadTasks} onTaskDeleted={loadTasks} />
+      <PopNewCard />
+      <PopBrowse />
       <PopUser />
     </Wrapper>
   );

@@ -1,21 +1,63 @@
 import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import MainPage from "../../pages/MainPage";
 import SignInPage from "../../pages/SignInPage";
 import SignUpPage from "../../pages/SignUpPage";
 import NotFoundPage from "../../pages/NotFoundPage";
-import { isAuthenticated } from "../../services/auth";
+import { useAuth } from "../../context/AuthContext";
 
-const AppRoutes = ({ setUser }) => {
+const ProtectedRoute = ({ children }) => {
+  const { isAuth } = useAuth();
+
+  if (!isAuth) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
+
+const PublicRoute = ({ children }) => {
+  const { isAuth } = useAuth();
+
+  if (isAuth) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
+const AppRoutes = () => {
   return (
     <Routes>
       <Route
         path="/"
-        element={isAuthenticated() ? <MainPage /> : <Navigate to="/login" />}
+        element={
+          <ProtectedRoute>
+            <MainPage />
+          </ProtectedRoute>
+        }
       />
-      <Route path="/login" element={<SignInPage setUser={setUser} />} />
-      <Route path="/register" element={<SignUpPage setUser={setUser} />} />
-      <Route path="*" element={<NotFoundPage />} />
+
+      <Route
+        path="/login"
+        element={
+          <PublicRoute>
+            <SignInPage />
+          </PublicRoute>
+        }
+      />
+
+      <Route
+        path="/register"
+        element={
+          <PublicRoute>
+            <SignUpPage />
+          </PublicRoute>
+        }
+      />
+
+      <Route path="/404" element={<NotFoundPage />} />
+      <Route path="*" element={<Navigate to="/404" replace />} />
     </Routes>
   );
 };
