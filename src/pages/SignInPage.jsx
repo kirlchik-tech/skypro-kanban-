@@ -43,6 +43,12 @@ const SignInPage = () => {
     }
   }, [isAuth, navigate]);
 
+  const clearError = () => {
+    if (error) {
+      setError("");
+    }
+  };
+
   const handleLogin = async (event) => {
     event.preventDefault();
 
@@ -62,11 +68,8 @@ const SignInPage = () => {
 
     try {
       await loginUser(login, password);
-
       navigate("/", { replace: true });
     } catch (err) {
-      console.error("Ошибка входа:", err);
-
       setError(getAuthErrorMessage(err, "Неверный логин или пароль"));
     } finally {
       setIsLoading(false);
@@ -97,30 +100,24 @@ const SignInPage = () => {
                 type="text"
                 placeholder="Логин"
                 value={login}
-                onChange={(event) => {
-                  setLogin(event.target.value);
-
-                  if (error) {
-                    setError("");
-                  }
-                }}
                 disabled={isLoading}
                 required
+                onChange={(event) => {
+                  setLogin(event.target.value);
+                  clearError();
+                }}
               />
 
               <S.ModalInput
                 type="password"
                 placeholder="Пароль"
                 value={password}
-                onChange={(event) => {
-                  setPassword(event.target.value);
-
-                  if (error) {
-                    setError("");
-                  }
-                }}
                 disabled={isLoading}
                 required
+                onChange={(event) => {
+                  setPassword(event.target.value);
+                  clearError();
+                }}
               />
 
               <S.ModalBtnEnter type="submit" disabled={isLoading}>

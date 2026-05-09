@@ -4,13 +4,13 @@ import { Container } from "../common/Layout.styled";
 import { useModal } from "../../context/ModalContext";
 import { useAuth } from "../../context/AuthContext";
 import {
-  HeaderContainer,
   HeaderBlock,
+  HeaderContainer,
   Logo,
   Nav,
   NewTaskButton,
-  UserButton,
   PopupUserMenu,
+  UserButton,
 } from "./Header.styled";
 
 const Header = () => {
@@ -43,7 +43,7 @@ const Header = () => {
         <HeaderBlock>
           <Logo>
             <Link to="/">
-              <img src="/images/logo.png" alt="logo" />
+              <img src="/images/logo.png" alt="Логотип Skypro Kanban" />
             </Link>
           </Logo>
 
@@ -58,7 +58,6 @@ const Header = () => {
 
             <PopupUserMenu $isOpen={isOpen}>
               <p className="pop-user-set__name">{userName}</p>
-
               <p className="pop-user-set__mail">{userEmail}</p>
 
               <div className="pop-user-set__theme">

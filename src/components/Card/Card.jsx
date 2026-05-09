@@ -1,56 +1,64 @@
 import React from "react";
 import { useModal } from "../../context/ModalContext";
 import {
-  CardItem,
   CardBlock,
-  CardGroup,
-  CardTheme,
-  CardMenu,
   CardContent,
-  CardTitle,
   CardDate,
+  CardGroup,
+  CardItem,
+  CardMenu,
+  CardTheme,
+  CardTitle,
 } from "./Card.styled";
 
 const formatDate = (dateString) => {
   if (!dateString) return "";
+
   const date = new Date(dateString);
-  const day = date.getDate().toString().padStart(2, "0");
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const year = date.getFullYear();
-  return `${day}.${month}.${year}`;
+
+  if (Number.isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+  }).format(date);
 };
 
-const Card = ({ topic, title, date, cardData }) => {
+const Card = ({ cardData }) => {
   const { openBrowse } = useModal();
 
-  const handleCardClick = (e) => {
-    if (e.target.closest(".card-menu")) {
-      return;
-    }
+  const handleOpenCard = () => {
     openBrowse(cardData);
   };
 
-  const handleMenuClick = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleMenuClick = (event) => {
+    event.stopPropagation();
     openBrowse(cardData);
   };
 
   return (
-    <CardItem onClick={handleCardClick} style={{ cursor: "pointer" }}>
+    <CardItem onClick={handleOpenCard}>
       <CardBlock>
         <CardGroup>
-          <CardTheme $topic={topic}>
-            <p>{topic}</p>
+          <CardTheme $topic={cardData.topic}>
+            <p>{cardData.topic}</p>
           </CardTheme>
-          <CardMenu className="card-menu" href="#" onClick={handleMenuClick}>
-            <div></div>
-            <div></div>
-            <div></div>
+
+          <CardMenu
+            type="button"
+            aria-label="Открыть задачу"
+            onClick={handleMenuClick}
+          >
+            <span />
+            <span />
+            <span />
           </CardMenu>
         </CardGroup>
+
         <CardContent>
-          <CardTitle>{title}</CardTitle>
+          <CardTitle>{cardData.title}</CardTitle>
+
           <CardDate>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -74,13 +82,15 @@ const Card = ({ topic, title, date, cardData }) => {
                   strokeLinejoin="round"
                 />
               </g>
+
               <defs>
                 <clipPath id="clip0_1_415">
                   <rect width="13" height="13" fill="white" />
                 </clipPath>
               </defs>
             </svg>
-            <p>{formatDate(date)}</p>
+
+            <p>{formatDate(cardData.date)}</p>
           </CardDate>
         </CardContent>
       </CardBlock>

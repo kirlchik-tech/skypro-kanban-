@@ -45,6 +45,12 @@ const SignUpPage = () => {
     }
   }, [isAuth, navigate]);
 
+  const clearError = () => {
+    if (error) {
+      setError("");
+    }
+  };
+
   const validateForm = () => {
     const trimmedLogin = login.trim();
     const trimmedName = name.trim();
@@ -98,11 +104,8 @@ const SignUpPage = () => {
 
     try {
       await register(login, name, password);
-
       navigate("/", { replace: true });
     } catch (err) {
-      console.error("Ошибка регистрации:", err);
-
       setError(
         getAuthErrorMessage(
           err,
@@ -111,12 +114,6 @@ const SignUpPage = () => {
       );
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const clearError = () => {
-    if (error) {
-      setError("");
     }
   };
 
@@ -142,48 +139,48 @@ const SignUpPage = () => {
             type="text"
             placeholder="Логин"
             value={login}
+            disabled={isLoading}
+            required
             onChange={(event) => {
               setLogin(event.target.value);
               clearError();
             }}
-            disabled={isLoading}
-            required
           />
 
           <S.Input
             type="text"
             placeholder="Имя"
             value={name}
+            disabled={isLoading}
+            required
             onChange={(event) => {
               setName(event.target.value);
               clearError();
             }}
-            disabled={isLoading}
-            required
           />
 
           <S.Input
             type="password"
             placeholder="Пароль"
             value={password}
+            disabled={isLoading}
+            required
             onChange={(event) => {
               setPassword(event.target.value);
               clearError();
             }}
-            disabled={isLoading}
-            required
           />
 
           <S.Input
             type="password"
             placeholder="Подтвердите пароль"
             value={confirmPassword}
+            disabled={isLoading}
+            required
             onChange={(event) => {
               setConfirmPassword(event.target.value);
               clearError();
             }}
-            disabled={isLoading}
-            required
           />
 
           <S.Button type="submit" disabled={isLoading}>

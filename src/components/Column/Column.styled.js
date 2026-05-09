@@ -3,6 +3,7 @@ import styled from "styled-components";
 export const ColumnContainer = styled.div`
   width: 20%;
   margin: 0 auto;
+
   display: block;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
@@ -11,8 +12,8 @@ export const ColumnContainer = styled.div`
 `;
 
 export const ColumnTitle = styled.div`
-  padding: 0 10px;
   margin: 15px 0;
+  padding: 0 10px;
 
   p {
     color: ${({ theme }) => theme.colors.textSecondary};
@@ -24,9 +25,11 @@ export const ColumnTitle = styled.div`
 `;
 
 export const CardsList = styled.div`
-  width: 100%;
-  display: block;
   position: relative;
+
+  width: 100%;
+
+  display: block;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
     display: flex;

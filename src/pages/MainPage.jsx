@@ -14,21 +14,7 @@ const MainPage = () => {
 
   const { cards, isLoading, error, loadTasks } = useTasks();
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        await loadTasks();
-      } catch (err) {
-        if (err?.response?.status === 401) {
-          navigate("/login", { replace: true });
-        }
-      }
-    };
-
-    fetchTasks();
-  }, [loadTasks, navigate]);
-
-  const handleRetry = async () => {
+  const loadTasksSafely = async () => {
     try {
       await loadTasks();
     } catch (err) {
@@ -37,6 +23,10 @@ const MainPage = () => {
       }
     }
   };
+
+  useEffect(() => {
+    loadTasksSafely();
+  }, [loadTasks, navigate]);
 
   if (error) {
     return (
@@ -48,7 +38,7 @@ const MainPage = () => {
 
           <button
             type="button"
-            onClick={handleRetry}
+            onClick={loadTasksSafely}
             style={{
               marginTop: "10px",
               padding: "8px 16px",

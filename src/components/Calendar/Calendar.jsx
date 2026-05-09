@@ -1,5 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+
+const months = [
+  "Январь",
+  "Февраль",
+  "Март",
+  "Апрель",
+  "Май",
+  "Июнь",
+  "Июль",
+  "Август",
+  "Сентябрь",
+  "Октябрь",
+  "Ноябрь",
+  "Декабрь",
+];
+
+const daysOfWeek = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"];
 
 const CalendarContainer = styled.div`
   width: 100%;
@@ -7,20 +24,21 @@ const CalendarContainer = styled.div`
 `;
 
 const CalendarTitle = styled.div`
-  font-family: "Roboto", sans-serif;
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 100%;
-  letter-spacing: 0px;
-  color: #000000;
   margin-bottom: 14px;
+
+  color: #000000;
+  font-family: "Roboto", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 100%;
 `;
 
 const CalendarNav = styled.div`
+  margin-bottom: 14px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
 `;
 
 const CalendarMonth = styled.div`
@@ -35,13 +53,19 @@ const NavActions = styled.div`
   gap: 12px;
 `;
 
-const NavAction = styled.div`
+const NavAction = styled.button`
   width: 18px;
   height: 25px;
-  cursor: pointer;
+  padding: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  border: none;
+  background: transparent;
+
+  cursor: pointer;
 
   svg {
     fill: #94a6be;
@@ -53,43 +77,53 @@ const NavAction = styled.div`
 `;
 
 const DaysNames = styled.div`
-  display: flex;
-  justify-content: space-between;
   margin-bottom: 7px;
   padding: 0 2px;
+
+  display: flex;
+  justify-content: space-between;
 `;
 
 const DayName = styled.div`
+  width: 22px;
+
   color: #94a6be;
   font-size: 10px;
   font-weight: 500;
   line-height: normal;
   letter-spacing: -0.2px;
-  width: 22px;
   text-align: center;
 `;
 
 const CalendarCells = styled.div`
   width: 100%;
+
   display: flex;
   flex-wrap: wrap;
 `;
 
-const CalendarCell = styled.div`
+const CalendarCell = styled.button`
   width: 22px;
   height: 22px;
   margin: 2px;
-  border-radius: 50%;
+  padding: 0;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  border: none;
+  border-radius: 50%;
+  background-color: ${({ $active }) => ($active ? "#94A6BE" : "transparent")};
+
+  color: ${({ $active }) => ($active ? "#FFFFFF" : "#94A6BE")};
+  font-family: inherit;
   font-size: 10px;
+  font-weight: 400;
   line-height: 1;
   letter-spacing: -0.2px;
+
   cursor: ${({ $editable }) => ($editable ? "pointer" : "default")};
-  background-color: ${({ $active }) => ($active ? "#94A6BE" : "transparent")};
-  color: ${({ $active }) => ($active ? "#FFFFFF" : "#94A6BE")};
-  font-weight: 400;
 
   &:hover {
     background-color: ${({ $editable, $active }) =>
@@ -103,90 +137,85 @@ const CalendarPeriod = styled.div`
 `;
 
 const PeriodText = styled.p`
-  font-family: "Roboto", sans-serif;
-  font-weight: 400;
-  font-size: 10px;
-  line-height: 100%;
-  letter-spacing: 0%;
-  text-align: center;
   margin: 0;
+
   color: #94a6be;
+  font-family: "Roboto", sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 100%;
+  letter-spacing: 0;
+  text-align: center;
 
   span {
     color: #000000;
   }
 `;
 
+const getDaysInMonth = (year, month) => {
+  return new Date(year, month + 1, 0).getDate();
+};
+
+const getFirstDayOfMonth = (year, month) => {
+  const firstDay = new Date(year, month, 1).getDay();
+
+  return firstDay === 0 ? 6 : firstDay - 1;
+};
+
+const formatDate = (date) => {
+  if (!date) return null;
+
+  return new Intl.DateTimeFormat("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+  }).format(date);
+};
+
 const Calendar = ({
   isEditable = false,
   selectedDate = null,
   onDateSelect,
 }) => {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDay, setSelectedDay] = useState(null);
-  const [selectedMonth, setSelectedMonth] = useState(null);
-  const [selectedYear, setSelectedYear] = useState(null);
+  const initialDate = selectedDate ? new Date(selectedDate) : new Date();
+
+  const [currentDate, setCurrentDate] = useState(initialDate);
+  const [activeDate, setActiveDate] = useState(selectedDate);
 
   useEffect(() => {
-    if (selectedDate) {
-      const date = new Date(selectedDate);
-      setSelectedDay(date.getDate());
-      setSelectedMonth(date.getMonth());
-      setSelectedYear(date.getFullYear());
-      setCurrentDate(date);
+    if (!selectedDate) {
+      setActiveDate(null);
+      return;
     }
+
+    const date = new Date(selectedDate);
+
+    setActiveDate(date);
+    setCurrentDate(date);
   }, [selectedDate]);
 
-  const months = [
-    "Январь",
-    "Февраль",
-    "Март",
-    "Апрель",
-    "Май",
-    "Июнь",
-    "Июль",
-    "Август",
-    "Сентябрь",
-    "Октябрь",
-    "Ноябрь",
-    "Декабрь",
-  ];
-
-  const daysOfWeek = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"];
-
-  const getDaysInMonth = (year, month) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
-
-  const getFirstDayOfMonth = (year, month) => {
-    let firstDay = new Date(year, month, 1).getDay();
-    return firstDay === 0 ? 6 : firstDay - 1;
-  };
-
   const prevMonth = () => {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1),
-    );
+    setCurrentDate((date) => new Date(date.getFullYear(), date.getMonth() - 1));
   };
 
   const nextMonth = () => {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1),
-    );
+    setCurrentDate((date) => new Date(date.getFullYear(), date.getMonth() + 1));
   };
 
   const handleDateSelect = (day) => {
     if (!isEditable) return;
 
-    setSelectedDay(day);
-    setSelectedMonth(currentDate.getMonth());
-    setSelectedYear(currentDate.getFullYear());
-    const dateObj = new Date(
+    const date = new Date(
       currentDate.getFullYear(),
       currentDate.getMonth(),
       day,
     );
-    if (onDateSelect) onDateSelect(dateObj);
+
+    setActiveDate(date);
+
+    if (onDateSelect) {
+      onDateSelect(date);
+    }
   };
 
   const renderCalendarCells = () => {
@@ -196,19 +225,31 @@ const Calendar = ({
     const firstDayIndex = getFirstDayOfMonth(year, month);
     const cells = [];
 
-    for (let i = 0; i < firstDayIndex; i++) {
-      cells.push(<CalendarCell key={`empty-${i}`} $editable={false} />);
+    for (let index = 0; index < firstDayIndex; index += 1) {
+      cells.push(
+        <CalendarCell
+          key={`empty-${index}`}
+          type="button"
+          $editable={false}
+          disabled
+        />,
+      );
     }
 
-    for (let day = 1; day <= daysInMonth; day++) {
+    for (let day = 1; day <= daysInMonth; day += 1) {
       const isSelected =
-        selectedDay === day && selectedMonth === month && selectedYear === year;
+        activeDate &&
+        activeDate.getDate() === day &&
+        activeDate.getMonth() === month &&
+        activeDate.getFullYear() === year;
 
       cells.push(
         <CalendarCell
           key={day}
+          type="button"
           $editable={isEditable}
           $active={isSelected}
+          disabled={!isEditable}
           onClick={() => handleDateSelect(day)}
         >
           {day}
@@ -219,28 +260,23 @@ const Calendar = ({
     return cells;
   };
 
-  const formatSelectedDate = () => {
-    if (selectedDay && selectedMonth !== null && selectedYear !== null) {
-      return `${selectedDay.toString().padStart(2, "0")}.${(selectedMonth + 1).toString().padStart(2, "0")}.${selectedYear}`;
-    }
-    if (selectedDate) {
-      const date = new Date(selectedDate);
-      return `${date.getDate().toString().padStart(2, "0")}.${(date.getMonth() + 1).toString().padStart(2, "0")}.${date.getFullYear()}`;
-    }
-    return null;
-  };
-
-  const displayDate = formatSelectedDate();
+  const displayDate = formatDate(activeDate);
 
   return (
     <CalendarContainer>
       <CalendarTitle>Даты</CalendarTitle>
+
       <CalendarNav>
         <CalendarMonth>
           {months[currentDate.getMonth()]} {currentDate.getFullYear()}
         </CalendarMonth>
+
         <NavActions>
-          <NavAction onClick={prevMonth}>
+          <NavAction
+            type="button"
+            aria-label="Предыдущий месяц"
+            onClick={prevMonth}
+          >
             <svg
               width="6"
               height="11"
@@ -254,7 +290,12 @@ const Calendar = ({
               />
             </svg>
           </NavAction>
-          <NavAction onClick={nextMonth}>
+
+          <NavAction
+            type="button"
+            aria-label="Следующий месяц"
+            onClick={nextMonth}
+          >
             <svg
               width="6"
               height="11"
@@ -281,7 +322,7 @@ const Calendar = ({
 
       <CalendarPeriod>
         <PeriodText>
-          {displayDate ? "Срок исполнения: " : "Выберите срок исполнения "}
+          {displayDate ? "Срок исполнения: " : "Выберите срок исполнения"}
           {displayDate && <span> {displayDate}</span>}
           {displayDate && "."}
         </PeriodText>

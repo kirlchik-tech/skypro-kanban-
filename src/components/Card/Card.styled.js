@@ -27,6 +27,8 @@ const getTopicStyle = (topic) => {
 
 export const CardItem = styled.div`
   padding: 5px;
+
+  cursor: pointer;
   animation-name: card-animation;
   animation-duration: 500ms;
   animation-timing-function: linear;
@@ -36,6 +38,7 @@ export const CardItem = styled.div`
       height: 0;
       opacity: 0;
     }
+
     100% {
       height: auto;
       opacity: 1;
@@ -46,19 +49,22 @@ export const CardItem = styled.div`
 export const CardBlock = styled.div`
   width: 220px;
   height: 130px;
-  background-color: ${({ theme }) => theme.colors.bgCard};
-  border-radius: 10px;
+  padding: 15px 13px 19px;
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: stretch;
-  padding: 15px 13px 19px;
+
+  background-color: ${({ theme }) => theme.colors.bgCard};
+  border-radius: 10px;
 `;
 
 export const CardGroup = styled.div`
   width: 100%;
   height: 20px;
   margin-bottom: 12px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -68,8 +74,10 @@ export const CardTheme = styled.div`
   width: auto;
   height: 20px;
   padding: 5px 14px;
+
   border-radius: 18px;
-  ${({ $topic }) => getTopicStyle($topic)} // ← $topic
+
+  ${({ $topic }) => getTopicStyle($topic)}
 
   p {
     font-size: 10px;
@@ -78,33 +86,43 @@ export const CardTheme = styled.div`
   }
 `;
 
-export const CardMenu = styled.div`
+export const CardMenu = styled.button`
   width: 24px;
   height: 24px;
+  padding: 2px;
+
   display: flex;
   align-items: center;
   justify-content: space-around;
-  padding: 2px;
+
+  border: none;
+  background: transparent;
+
   cursor: pointer;
 
-  div {
+  span {
     width: 4px;
     height: 4px;
-    border-radius: 50%;
+
+    display: block;
+
     background-color: ${({ theme }) => theme.colors.textSecondary};
+    border-radius: 50%;
   }
 `;
 
 export const CardTitle = styled.h3`
+  margin-bottom: 10px;
+
+  color: ${({ theme }) => theme.colors.textPrimary};
   font-size: 14px;
   font-weight: 500;
   line-height: 18px;
-  color: ${({ theme }) => theme.colors.textPrimary};
-  margin-bottom: 10px;
 `;
 
 export const CardContent = styled.div`
   height: 64px;
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -122,11 +140,12 @@ export const CardDate = styled.div`
 
   p {
     margin-left: 6px;
+
+    color: ${({ theme }) => theme.colors.textSecondary};
     font-family: "Roboto", sans-serif;
-    font-weight: 400;
     font-size: 10px;
+    font-weight: 400;
     line-height: 100%;
-    letter-spacing: 1%;
-    color: #94a6be;
+    letter-spacing: 0.01em;
   }
 `;
