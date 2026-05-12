@@ -1,5 +1,35 @@
 import styled from "styled-components";
 
+const getTopicBackground = (topic, theme) => {
+  switch (topic) {
+    case "Web Design":
+      return theme.colors.orangeBg;
+    case "Research":
+      return theme.colors.greenBg;
+    case "Copywriting":
+      return theme.colors.purpleBg;
+    default:
+      return theme.colors.bgDescription;
+  }
+};
+
+const getTopicColor = (topic, theme) => {
+  if (theme.name === "dark") {
+    return theme.colors.textLight;
+  }
+
+  switch (topic) {
+    case "Web Design":
+      return theme.colors.orange;
+    case "Research":
+      return theme.colors.green;
+    case "Copywriting":
+      return theme.colors.purple;
+    default:
+      return theme.colors.textSecondary;
+  }
+};
+
 export const PopBrowseContainer = styled.div`
   position: fixed;
   inset: 0;
@@ -9,7 +39,7 @@ export const PopBrowseContainer = styled.div`
   align-items: center;
   justify-content: center;
 
-  background: rgba(0, 0, 0, 0.4);
+  background: ${({ theme }) => theme.colors.overlay};
 `;
 
 export const PopBrowseBlock = styled.div`
@@ -17,12 +47,18 @@ export const PopBrowseBlock = styled.div`
   height: 492px;
   padding: 40px 30px 48px;
 
-  box-sizing: border-box;
   position: relative;
+  box-sizing: border-box;
 
-  background: #ffffff;
-  border: 0.7px solid #d4dbe5;
+  color: ${({ theme }) => theme.colors.textPrimary};
+  background: ${({ theme }) => theme.colors.bgPopup};
+  border: 0.7px solid ${({ theme }) => theme.colors.border};
   border-radius: 10px;
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 
   &,
   * {
@@ -48,12 +84,22 @@ export const PopBrowseContent = styled.div`
 export const PopBrowseHeader = styled.div`
   width: 100%;
   min-height: 30px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
+`;
+
+export const TitleText = styled.h3`
+  margin: 0;
+
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font-family: "Roboto", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 100%;
 `;
 
 export const TitleInput = styled.input`
@@ -67,32 +113,23 @@ export const TitleInput = styled.input`
   outline: none;
   background: transparent;
 
-  color: #000000;
-  font-family: inherit;
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font-family: "Roboto", sans-serif;
   font-size: 20px;
-  font-weight: 700;
-  line-height: 24px;
+  font-weight: 600;
+  line-height: 100%;
 
   box-shadow: ${({ $hasError }) => ($hasError ? "0 1px 0 #ff4d4f" : "none")};
 
   &::placeholder {
-    color: #000000;
+    color: ${({ theme }) => theme.colors.textPrimary};
     opacity: 1;
   }
 
   &:disabled {
-    opacity: 0.7;
     cursor: not-allowed;
+    opacity: 0.7;
   }
-`;
-
-export const PopBrowseTtl = styled.h3`
-  margin: 0;
-
-  color: #000000;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 24px;
 `;
 
 export const TopicTag = styled.div`
@@ -124,7 +161,13 @@ export const TopicTag = styled.div`
     }
   }};
 
-  color: ${({ $topic }) => {
+  color: ${({ $topic, theme }) => {
+    const isDarkTheme = theme.name === "dark";
+
+    if (isDarkTheme) {
+      return "rgba(255, 255, 255, 0.86)";
+    }
+
     switch ($topic) {
       case "Web Design":
         return "#FF6D00";
@@ -150,16 +193,17 @@ export const Subttl = styled.label`
   display: block;
   margin: 0 0 14px;
 
-  color: #000000;
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font-family: "Roboto", sans-serif;
   font-size: 14px;
   font-weight: 600;
-  line-height: 14px;
+  line-height: 100%;
 `;
 
 export const StatusBlock = styled.div`
   width: 570px;
   height: 60px;
-  margin-bottom: 20px;
+  margin-bottom: 21px;
 
   display: flex;
   flex-direction: column;
@@ -168,15 +212,26 @@ export const StatusBlock = styled.div`
   ${Subttl} {
     margin-bottom: 0;
   }
+
+  @media (max-width: 700px) {
+    width: 100%;
+    height: auto;
+  }
 `;
 
 export const StatusButtons = styled.div`
-  width: 570px;
+  width: ${({ $isEditMode }) => ($isEditMode ? "570px" : "auto")};
   height: 30px;
 
   display: flex;
   align-items: center;
   gap: 7px;
+
+  @media (max-width: 700px) {
+    width: 100%;
+    height: auto;
+    flex-wrap: wrap;
+  }
 `;
 
 export const StatusButton = styled.button`
@@ -188,18 +243,25 @@ export const StatusButton = styled.button`
   justify-content: center;
   flex: 0 0 auto;
 
-  border: 0.7px solid rgba(148, 166, 190, 0.4);
+  border: 0.7px solid ${({ theme }) => theme.colors.borderSoft};
   border-radius: 24px;
-  background: ${({ $active }) => ($active ? "#94A6BE" : "#FFFFFF")};
+  background: ${({ $active, theme }) =>
+    $active ? theme.colors.grayBg : "transparent"};
 
-  color: ${({ $active }) => ($active ? "#FFFFFF" : "#94A6BE")};
-  font-family: inherit;
+  color: ${({ $active, theme }) => {
+    if (!$active) return theme.colors.textSecondary;
+    return theme.name === "dark"
+      ? theme.colors.bgPopup
+      : theme.colors.textLight;
+  }};
+
+  font-family: "Roboto", sans-serif;
   font-size: 14px;
   font-weight: 400;
   line-height: 14px;
   white-space: nowrap;
 
-  cursor: pointer;
+  cursor: ${({ $readonly }) => ($readonly ? "default" : "pointer")};
   transition: 0.2s ease;
 
   &:nth-child(1) {
@@ -223,18 +285,22 @@ export const StatusButton = styled.button`
   }
 
   &:hover {
-    background: ${({ $active }) => ($active ? "#94A6BE" : "#F4F7F9")};
+    background: ${({ $active, $readonly, theme }) => {
+      if ($active) return theme.colors.grayBg;
+      if ($readonly) return "transparent";
+      return theme.colors.bgDescription;
+    }};
   }
 
   &:disabled {
-    cursor: not-allowed;
-    opacity: 0.7;
+    opacity: 1;
   }
 `;
 
 export const MainContent = styled.div`
-  width: 100%;
-  margin-bottom: 18px;
+  width: 570px;
+  height: 230px;
+  margin-bottom: 21px;
 
   display: grid;
   grid-template-columns: 370px 180px;
@@ -242,6 +308,8 @@ export const MainContent = styled.div`
   align-items: start;
 
   @media (max-width: 700px) {
+    width: 100%;
+    height: auto;
     grid-template-columns: 1fr;
     row-gap: 22px;
   }
@@ -259,8 +327,33 @@ export const DescriptionBlock = styled.div`
   width: 100%;
 `;
 
+export const DescriptionPreview = styled.div`
+  width: 370px;
+  height: 200px;
+  padding: 14px;
+
+  display: block;
+  overflow: auto;
+
+  border: none;
+  border-radius: 8px;
+  background: ${({ theme }) => theme.colors.bgDescription};
+
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font-family: "Roboto", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+
+  transition: background-color 0.2s ease;
+
+  @media (max-width: 700px) {
+    width: 100%;
+  }
+`;
+
 export const DescriptionTextarea = styled.textarea`
-  width: 100%;
+  width: 370px;
   height: 200px;
   padding: 14px;
 
@@ -269,32 +362,45 @@ export const DescriptionTextarea = styled.textarea`
   resize: none;
   outline: none;
 
-  border: 0.7px solid rgba(148, 166, 190, 0.4);
+  border: 0.7px solid ${({ theme }) => theme.colors.borderSoft};
   border-radius: 8px;
-  background: #ffffff;
+  background: ${({ theme }) => theme.colors.bgInput};
 
-  color: #000000;
-  font-family: inherit;
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font-family: "Roboto", sans-serif;
   font-size: 14px;
   font-weight: 400;
   line-height: 20px;
 
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+
   &::placeholder {
-    color: #94a6be;
+    color: ${({ theme }) => theme.colors.textSecondary};
   }
 
   &:focus {
-    border-color: #565eef;
+    border-color: ${({ theme }) => theme.colors.primary};
   }
 
   &:disabled {
     cursor: not-allowed;
     opacity: 0.7;
   }
+
+  @media (max-width: 700px) {
+    width: 100%;
+  }
 `;
 
 export const CalendarBox = styled.div`
   width: 180px;
+
+  @media (max-width: 700px) {
+    width: 180px;
+  }
 `;
 
 export const CalendarHeader = styled.div`
@@ -310,7 +416,8 @@ export const CalendarHeader = styled.div`
 export const CalendarMonth = styled.p`
   margin: 0;
 
-  color: #94a6be;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font-family: "Roboto", sans-serif;
   font-size: 14px;
   font-weight: 600;
   line-height: 14px;
@@ -334,7 +441,7 @@ export const CalendarArrow = styled.button`
   border: none;
   background: transparent;
 
-  color: #94a6be;
+  color: ${({ theme }) => theme.colors.textSecondary};
   font-size: 26px;
   font-weight: 400;
   line-height: 18px;
@@ -343,7 +450,7 @@ export const CalendarArrow = styled.button`
   transition: color 0.2s ease;
 
   &:hover {
-    color: #565eef;
+    color: ${({ theme }) => theme.colors.primary};
   }
 `;
 
@@ -360,7 +467,8 @@ export const CalendarWeekDay = styled.span`
   width: 20px;
 
   text-align: center;
-  color: #94a6be;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font-family: "Roboto", sans-serif;
   font-size: 10px;
   font-weight: 400;
   line-height: 10px;
@@ -392,41 +500,52 @@ export const CalendarDay = styled.button`
   border: none;
   border-radius: 50%;
 
-  background: ${({ $selected, $today }) => {
-    if ($selected) return "#94A6BE";
-    if ($today) return "#EAEEF6";
+  background: ${({ $selected, $today, theme }) => {
+    if ($selected) return theme.colors.grayBg;
+    if ($today) return theme.colors.bgDescription;
     return "transparent";
   }};
 
-  color: ${({ $selected }) => ($selected ? "#FFFFFF" : "#94A6BE")};
-  font-family: inherit;
+  color: ${({ $selected, theme }) =>
+    $selected ? theme.colors.textLight : theme.colors.textSecondary};
+
+  font-family: "Roboto", sans-serif;
   font-size: 10px;
   font-weight: 400;
   line-height: 10px;
 
-  cursor: pointer;
+  cursor: ${({ $isEditMode }) => ($isEditMode ? "pointer" : "default")};
   transition: 0.2s ease;
 
   &:hover {
-    background: ${({ $selected }) => ($selected ? "#94A6BE" : "#EAEEF6")};
+    background: ${({ $selected, $isEditMode, theme }) => {
+      if ($selected) return theme.colors.grayBg;
+      if ($isEditMode) return theme.colors.bgDescription;
+      return "transparent";
+    }};
+  }
+
+  &:disabled {
+    opacity: 1;
   }
 `;
 
 export const DeadlineText = styled.p`
   margin: 12px 0 0;
 
-  color: #94a6be;
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font-family: "Roboto", sans-serif;
   font-size: 10px;
   font-weight: 400;
   line-height: 12px;
 `;
 
 export const DeadlineDate = styled.span`
-  color: #000000;
+  color: ${({ theme }) => theme.colors.textPrimary};
 `;
 
 export const ButtonGroup = styled.div`
-  width: 100%;
+  width: 570px;
   height: 30px;
   margin-top: 0;
 
@@ -434,12 +553,24 @@ export const ButtonGroup = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+
+  @media (max-width: 700px) {
+    width: 100%;
+    height: auto;
+    align-items: flex-start;
+    flex-direction: column;
+  }
 `;
 
 export const ButtonsLeft = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+
+  @media (max-width: 700px) {
+    width: 100%;
+    flex-wrap: wrap;
+  }
 `;
 
 const BaseButton = styled.button`
@@ -452,7 +583,7 @@ const BaseButton = styled.button`
 
   border-radius: 4px;
 
-  font-family: inherit;
+  font-family: "Roboto", sans-serif;
   font-size: 14px;
   font-weight: 500;
   line-height: 14px;
@@ -467,54 +598,27 @@ const BaseButton = styled.button`
   }
 `;
 
-export const SaveButton = styled(BaseButton)`
-  min-width: 105px;
-
-  border: 0.7px solid #565eef;
-  background: #565eef;
-  color: #ffffff;
-
-  &:hover:not(:disabled) {
-    background: #33399b;
-    border-color: #33399b;
-  }
-`;
-
-export const CancelButton = styled(BaseButton)`
-  min-width: 99px;
-
-  border: 0.7px solid #565eef;
-  background: #ffffff;
-  color: #565eef;
-
-  &:hover {
-    background: #565eef;
-    color: #ffffff;
-  }
-`;
-
-export const DeleteButton = styled(BaseButton)`
-  min-width: 140px;
-
-  border: 0.7px solid #565eef;
-  background: #ffffff;
-  color: #565eef;
-
-  &:hover:not(:disabled) {
-    background: #565eef;
-    color: #ffffff;
-  }
-`;
-
-export const PopBrowseClose = styled(BaseButton)`
+export const PrimaryButton = styled(BaseButton)`
   min-width: 92px;
 
-  border: 0.7px solid #565eef;
-  background: #565eef;
-  color: #ffffff;
+  border: 0.7px solid ${({ theme }) => theme.colors.primary};
+  background: ${({ theme }) => theme.colors.primary};
+  color: ${({ theme }) => theme.colors.textLight};
 
-  &:hover {
-    background: #33399b;
-    border-color: #33399b;
+  &:hover:not(:disabled) {
+    background: ${({ theme }) => theme.colors.primaryHover};
+    border-color: ${({ theme }) => theme.colors.primaryHover};
+  }
+`;
+
+export const SecondaryButton = styled(BaseButton)`
+  border: 0.7px solid ${({ theme }) => theme.colors.textPrimary};
+  background: transparent;
+  color: ${({ theme }) => theme.colors.textPrimary};
+
+  &:hover:not(:disabled) {
+    border-color: ${({ theme }) => theme.colors.primary};
+    background: ${({ theme }) => theme.colors.primary};
+    color: ${({ theme }) => theme.colors.textLight};
   }
 `;

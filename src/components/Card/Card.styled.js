@@ -57,7 +57,14 @@ export const CardBlock = styled.div`
   justify-content: stretch;
 
   background-color: ${({ theme }) => theme.colors.bgCard};
+  border: 0.7px solid
+    ${({ theme }) =>
+      theme.name === "dark" ? theme.colors.border : "transparent"};
   border-radius: 10px;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 `;
 
 export const CardGroup = styled.div`
@@ -80,13 +87,14 @@ export const CardTheme = styled.div`
   ${({ $topic }) => getTopicStyle($topic)}
 
   p {
+    color: currentColor;
     font-size: 10px;
     font-weight: 600;
     line-height: 10px;
   }
 `;
 
-export const CardMenu = styled.button`
+export const CardMenu = styled.div`
   width: 24px;
   height: 24px;
   padding: 2px;
@@ -95,12 +103,9 @@ export const CardMenu = styled.button`
   align-items: center;
   justify-content: space-around;
 
-  border: none;
-  background: transparent;
-
   cursor: pointer;
 
-  span {
+  div {
     width: 4px;
     height: 4px;
 

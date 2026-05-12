@@ -7,6 +7,8 @@ export const Wrapper = styled.div`
   overflow: hidden;
 
   background-color: ${({ theme }) => theme.colors.bgMain};
+
+  transition: background-color 0.2s ease;
 `;
 
 export const Container = styled.div`

@@ -1,8 +1,6 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 
-const ModalContext = createContext();
-
-export const useModal = () => useContext(ModalContext);
+const ModalContext = createContext(null);
 
 export const ModalProvider = ({ children }) => {
   const [isNewCardOpen, setIsNewCardOpen] = useState(false);
@@ -10,38 +8,59 @@ export const ModalProvider = ({ children }) => {
   const [isExitOpen, setIsExitOpen] = useState(false);
   const [currentTask, setCurrentTask] = useState(null);
 
-  const openNewCard = () => setIsNewCardOpen(true);
-  const closeNewCard = () => setIsNewCardOpen(false);
+  const openNewCard = () => {
+    setIsNewCardOpen(true);
+  };
 
-  const openBrowse = (card) => {
-    console.log("Open browse with:", card);
-    setCurrentTask(card);
+  const closeNewCard = () => {
+    setIsNewCardOpen(false);
+  };
+
+  const openBrowse = (task) => {
+    setCurrentTask(task);
     setIsBrowseOpen(true);
   };
+
   const closeBrowse = () => {
     setCurrentTask(null);
     setIsBrowseOpen(false);
   };
 
-  const openExit = () => setIsExitOpen(true);
-  const closeExit = () => setIsExitOpen(false);
+  const openExit = () => {
+    setIsExitOpen(true);
+  };
+
+  const closeExit = () => {
+    setIsExitOpen(false);
+  };
+
+  const value = useMemo(
+    () => ({
+      isNewCardOpen,
+      isBrowseOpen,
+      isExitOpen,
+      currentTask,
+      openNewCard,
+      closeNewCard,
+      openBrowse,
+      closeBrowse,
+      openExit,
+      closeExit,
+    }),
+    [isNewCardOpen, isBrowseOpen, isExitOpen, currentTask],
+  );
 
   return (
-    <ModalContext.Provider
-      value={{
-        isNewCardOpen,
-        isBrowseOpen,
-        isExitOpen,
-        currentTask,
-        openNewCard,
-        closeNewCard,
-        openBrowse,
-        closeBrowse,
-        openExit,
-        closeExit,
-      }}
-    >
-      {children}
-    </ModalContext.Provider>
+    <ModalContext.Provider value={value}>{children}</ModalContext.Provider>
   );
+};
+
+export const useModal = () => {
+  const context = useContext(ModalContext);
+
+  if (!context) {
+    throw new Error("useModal должен использоваться внутри ModalProvider");
+  }
+
+  return context;
 };

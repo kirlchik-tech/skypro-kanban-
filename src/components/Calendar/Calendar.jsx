@@ -26,7 +26,7 @@ const CalendarContainer = styled.div`
 const CalendarTitle = styled.div`
   margin-bottom: 14px;
 
-  color: #000000;
+  color: ${({ theme }) => theme.colors.textPrimary};
   font-family: "Roboto", sans-serif;
   font-size: 14px;
   font-weight: 600;
@@ -42,7 +42,7 @@ const CalendarNav = styled.div`
 `;
 
 const CalendarMonth = styled.div`
-  color: #94a6be;
+  color: ${({ theme }) => theme.colors.textSecondary};
   font-size: 14px;
   font-weight: 600;
   line-height: 25px;
@@ -67,12 +67,13 @@ const NavAction = styled.button`
 
   cursor: pointer;
 
-  svg {
-    fill: #94a6be;
+  svg path {
+    fill: ${({ theme }) => theme.colors.textSecondary};
+    transition: fill 0.2s ease;
   }
 
-  &:hover svg {
-    fill: #565eef;
+  &:hover svg path {
+    fill: ${({ theme }) => theme.colors.primary};
   }
 `;
 
@@ -87,7 +88,7 @@ const DaysNames = styled.div`
 const DayName = styled.div`
   width: 22px;
 
-  color: #94a6be;
+  color: ${({ theme }) => theme.colors.textSecondary};
   font-size: 10px;
   font-weight: 500;
   line-height: normal;
@@ -114,9 +115,12 @@ const CalendarCell = styled.button`
 
   border: none;
   border-radius: 50%;
-  background-color: ${({ $active }) => ($active ? "#94A6BE" : "transparent")};
+  background-color: ${({ $active, theme }) =>
+    $active ? theme.colors.grayBg : "transparent"};
 
-  color: ${({ $active }) => ($active ? "#FFFFFF" : "#94A6BE")};
+  color: ${({ $active, theme }) =>
+    $active ? theme.colors.textLight : theme.colors.textSecondary};
+
   font-family: inherit;
   font-size: 10px;
   font-weight: 400;
@@ -124,22 +128,28 @@ const CalendarCell = styled.button`
   letter-spacing: -0.2px;
 
   cursor: ${({ $editable }) => ($editable ? "pointer" : "default")};
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease;
 
   &:hover {
-    background-color: ${({ $editable, $active }) =>
-      $editable && !$active ? "#EAEEF6" : ""};
+    background-color: ${({ $editable, $active, theme }) => {
+      if ($active) return theme.colors.grayBg;
+      if ($editable) return theme.colors.bgDescription;
+      return "transparent";
+    }};
+  }
+
+  &:disabled {
+    opacity: 1;
   }
 `;
 
-const CalendarPeriod = styled.div`
-  margin-top: 14px;
-  padding: 0 2px;
-`;
-
 const PeriodText = styled.p`
-  margin: 0;
+  margin: 14px 0 0;
+  padding: 0 2px;
 
-  color: #94a6be;
+  color: ${({ theme }) => theme.colors.textSecondary};
   font-family: "Roboto", sans-serif;
   font-size: 10px;
   font-weight: 400;
@@ -148,9 +158,17 @@ const PeriodText = styled.p`
   text-align: center;
 
   span {
-    color: #000000;
+    color: ${({ theme }) => theme.colors.textPrimary};
   }
 `;
+
+const getValidDate = (date) => {
+  if (!date) return null;
+
+  const parsedDate = new Date(date);
+
+  return Number.isNaN(parsedDate.getTime()) ? null : parsedDate;
+};
 
 const getDaysInMonth = (year, month) => {
   return new Date(year, month + 1, 0).getDate();
@@ -177,18 +195,20 @@ const Calendar = ({
   selectedDate = null,
   onDateSelect,
 }) => {
-  const initialDate = selectedDate ? new Date(selectedDate) : new Date();
+  const validSelectedDate = getValidDate(selectedDate);
 
-  const [currentDate, setCurrentDate] = useState(initialDate);
-  const [activeDate, setActiveDate] = useState(selectedDate);
+  const [currentDate, setCurrentDate] = useState(
+    validSelectedDate || new Date(),
+  );
+  const [activeDate, setActiveDate] = useState(validSelectedDate);
 
   useEffect(() => {
-    if (!selectedDate) {
+    const date = getValidDate(selectedDate);
+
+    if (!date) {
       setActiveDate(null);
       return;
     }
-
-    const date = new Date(selectedDate);
 
     setActiveDate(date);
     setCurrentDate(date);
@@ -212,10 +232,7 @@ const Calendar = ({
     );
 
     setActiveDate(date);
-
-    if (onDateSelect) {
-      onDateSelect(date);
-    }
+    onDateSelect?.(date);
   };
 
   const renderCalendarCells = () => {
@@ -232,6 +249,7 @@ const Calendar = ({
           type="button"
           $editable={false}
           disabled
+          aria-hidden="true"
         />,
       );
     }
@@ -284,10 +302,7 @@ const Calendar = ({
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path
-                d="M5.72945 1.95273C6.09018 1.62041 6.09018 1.0833 5.72945 0.750969C5.36622 0.416344 4.7754 0.416344 4.41218 0.750969L0.528487 4.32883C-0.176162 4.97799 -0.176162 6.02201 0.528487 6.67117L4.41217 10.249C4.7754 10.5837 5.36622 10.5837 5.72945 10.249C6.09018 9.9167 6.09018 9.37959 5.72945 9.04727L1.87897 5.5L5.72945 1.95273Z"
-                fill="#94A6BE"
-              />
+              <path d="M5.72945 1.95273C6.09018 1.62041 6.09018 1.0833 5.72945 0.750969C5.36622 0.416344 4.7754 0.416344 4.41218 0.750969L0.528487 4.32883C-0.176162 4.97799 -0.176162 6.02201 0.528487 6.67117L4.41217 10.249C4.7754 10.5837 5.36622 10.5837 5.72945 10.249C6.09018 9.9167 6.09018 9.37959 5.72945 9.04727L1.87897 5.5L5.72945 1.95273Z" />
             </svg>
           </NavAction>
 
@@ -303,10 +318,7 @@ const Calendar = ({
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
-              <path
-                d="M0.27055 9.04727C-0.0901833 9.37959 -0.0901832 9.9167 0.27055 10.249C0.633779 10.5837 1.2246 10.5837 1.58783 10.249L5.47151 6.67117C6.17616 6.02201 6.17616 4.97799 5.47151 4.32883L1.58782 0.75097C1.2246 0.416344 0.633779 0.416344 0.270549 0.75097C-0.0901831 1.0833 -0.090184 1.62041 0.270549 1.95273L4.12103 5.5L0.27055 9.04727Z"
-                fill="#94A6BE"
-              />
+              <path d="M0.27055 9.04727C-0.0901833 9.37959 -0.0901832 9.9167 0.27055 10.249C0.633779 10.5837 1.2246 10.5837 1.58783 10.249L5.47151 6.67117C6.17616 6.02201 6.17616 4.97799 5.47151 4.32883L1.58782 0.75097C1.2246 0.416344 0.633779 0.416344 0.270549 0.75097C-0.0901831 1.0833 -0.090184 1.62041 0.270549 1.95273L4.12103 5.5L0.27055 9.04727Z" />
             </svg>
           </NavAction>
         </NavActions>
@@ -320,13 +332,11 @@ const Calendar = ({
 
       <CalendarCells>{renderCalendarCells()}</CalendarCells>
 
-      <CalendarPeriod>
-        <PeriodText>
-          {displayDate ? "Срок исполнения: " : "Выберите срок исполнения"}
-          {displayDate && <span> {displayDate}</span>}
-          {displayDate && "."}
-        </PeriodText>
-      </CalendarPeriod>
+      <PeriodText>
+        {displayDate ? "Срок исполнения: " : "Выберите срок исполнения"}
+        {displayDate && <span> {displayDate}</span>}
+        {displayDate && "."}
+      </PeriodText>
     </CalendarContainer>
   );
 };

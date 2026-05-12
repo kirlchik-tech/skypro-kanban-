@@ -14,6 +14,22 @@ const getHeaders = () => {
     : {};
 };
 
+const createNetworkError = () => {
+  const error = new Error(
+    "Сервер временно недоступен. Проверьте подключение к интернету или попробуйте позже.",
+  );
+
+  error.response = {
+    data: {
+      message:
+        "Сервер временно недоступен. Проверьте подключение к интернету или попробуйте позже.",
+    },
+    status: 0,
+  };
+
+  return error;
+};
+
 const parseResponse = async (response) => {
   const text = await response.text();
 
@@ -31,7 +47,7 @@ const parseResponse = async (response) => {
     const message =
       typeof data === "string"
         ? data
-        : data?.error || data?.message || `HTTP ${response.status}`;
+        : data?.error || data?.message || `Ошибка запроса: ${response.status}`;
 
     const error = new Error(message);
 
@@ -46,48 +62,54 @@ const parseResponse = async (response) => {
   return data;
 };
 
+const request = async (url, options = {}) => {
+  try {
+    const response = await fetch(url, options);
+
+    return await parseResponse(response);
+  } catch (err) {
+    if (err instanceof TypeError) {
+      throw createNetworkError();
+    }
+
+    throw err;
+  }
+};
+
 export const getTasks = async () => {
-  const response = await fetch(`${baseURL}/kanban`, {
+  const data = await request(`${baseURL}/kanban`, {
     method: "GET",
     headers: getHeaders(),
   });
 
-  const data = await parseResponse(response);
-
-  return data.tasks;
+  return Array.isArray(data.tasks) ? data.tasks : [];
 };
 
 export const addTask = async (taskData) => {
-  const response = await fetch(`${baseURL}/kanban`, {
+  const data = await request(`${baseURL}/kanban`, {
     method: "POST",
     headers: getHeaders(),
     body: createJsonBody(taskData),
   });
 
-  const data = await parseResponse(response);
-
-  return data.tasks;
+  return Array.isArray(data.tasks) ? data.tasks : [];
 };
 
 export const updateTask = async (id, taskData) => {
-  const response = await fetch(`${baseURL}/kanban/${id}`, {
+  const data = await request(`${baseURL}/kanban/${id}`, {
     method: "PUT",
     headers: getHeaders(),
     body: createJsonBody(taskData),
   });
 
-  const data = await parseResponse(response);
-
   return data.tasks || data;
 };
 
 export const deleteTask = async (id) => {
-  const response = await fetch(`${baseURL}/kanban/${id}`, {
+  const data = await request(`${baseURL}/kanban/${id}`, {
     method: "DELETE",
     headers: getHeaders(),
   });
 
-  const data = await parseResponse(response);
-
-  return data.tasks;
+  return Array.isArray(data.tasks) ? data.tasks : [];
 };

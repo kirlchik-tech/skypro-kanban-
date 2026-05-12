@@ -1,5 +1,21 @@
 import styled from "styled-components";
 
+const getCategoryBackground = (theme, bgColor, textColor) => {
+  if (theme.name === "dark") {
+    return textColor || theme.colors.grayBg;
+  }
+
+  return bgColor || theme.colors.grayBg;
+};
+
+const getCategoryColor = (theme, textColor) => {
+  if (theme.name === "dark") {
+    return theme.colors.textLight;
+  }
+
+  return textColor || theme.colors.textLight;
+};
+
 export const PopNewCard = styled.div`
   position: fixed;
   top: 0;
@@ -24,7 +40,7 @@ export const PopNewCardContainer = styled.div`
   align-items: center;
   justify-content: center;
 
-  background: rgba(0, 0, 0, 0.4);
+  background: ${({ theme }) => theme.colors.overlay};
 `;
 
 export const PopNewCardBlock = styled.div`
@@ -36,9 +52,19 @@ export const PopNewCardBlock = styled.div`
   display: block;
   position: relative;
 
-  background-color: #ffffff;
-  border: 0.7px solid #d4dbe5;
+  color: ${({ theme }) => theme.colors.textPrimary};
+  background-color: ${({ theme }) => theme.colors.bgPopup};
+  border: 0.7px solid ${({ theme }) => theme.colors.border};
   border-radius: 10px;
+
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobileL}) {
+    padding: 32px 20px;
+  }
 `;
 
 export const PopNewCardContent = styled.div`
@@ -49,7 +75,7 @@ export const PopNewCardContent = styled.div`
 export const PopNewCardTtl = styled.h3`
   margin-bottom: 20px;
 
-  color: #000000;
+  color: ${({ theme }) => theme.colors.textPrimary};
   font-size: 20px;
   font-weight: 700;
   line-height: 24px;
@@ -63,7 +89,7 @@ export const PopNewCardMainContent = styled.div`
   justify-content: space-between;
   gap: 20px;
 
-  @media (max-width: 660px) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobileL}) {
     flex-direction: column;
   }
 `;
@@ -87,7 +113,7 @@ export const Subttl = styled.label`
   display: block;
   margin-bottom: 14px;
 
-  color: #000000;
+  color: ${({ theme }) => theme.colors.textPrimary};
   font-family: "Roboto", sans-serif;
   font-size: 14px;
   font-weight: 600;
@@ -99,22 +125,33 @@ export const PopNewCardInput = styled.input`
   padding: 14px;
 
   outline: none;
-  background: transparent;
-  border: 0.7px solid rgba(148, 166, 190, 0.4);
+  background: ${({ theme }) => theme.colors.bgInput};
+  border: 0.7px solid ${({ theme }) => theme.colors.borderSoft};
   border-radius: 8px;
 
+  color: ${({ theme }) => theme.colors.textPrimary};
   font-size: 14px;
   line-height: 1;
   letter-spacing: -0.14px;
 
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+
   &::placeholder {
-    color: #94a6be;
+    color: ${({ theme }) => theme.colors.textSecondary};
     font-weight: 400;
   }
 
   &:focus {
-    border-color: #565eef;
+    border-color: ${({ theme }) => theme.colors.primary};
     outline: none;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
   }
 `;
 
@@ -124,25 +161,36 @@ export const PopNewCardArea = styled.textarea`
   height: 200px;
   padding: 14px;
 
-  resize: vertical;
+  resize: none;
   outline: none;
-  background: transparent;
-  border: 0.7px solid rgba(148, 166, 190, 0.4);
+  background: ${({ theme }) => theme.colors.bgInput};
+  border: 0.7px solid ${({ theme }) => theme.colors.borderSoft};
   border-radius: 8px;
 
+  color: ${({ theme }) => theme.colors.textPrimary};
   font-family: inherit;
   font-size: 14px;
   line-height: 1.4;
   letter-spacing: -0.14px;
 
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+
   &::placeholder {
-    color: #94a6be;
+    color: ${({ theme }) => theme.colors.textSecondary};
     font-weight: 400;
   }
 
   &:focus {
-    border-color: #565eef;
+    border-color: ${({ theme }) => theme.colors.primary};
     outline: none;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
   }
 `;
 
@@ -150,7 +198,7 @@ export const CalendarWrapper = styled.div`
   width: 100%;
   max-width: 182px;
 
-  @media (max-width: 660px) {
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobileL}) {
     max-width: 100%;
   }
 `;
@@ -176,9 +224,21 @@ export const CategoriesThemeItem = styled.button`
 
   border: none;
   border-radius: 24px;
-  background-color: ${({ $bgColor }) => $bgColor || "#94a6be"};
 
-  color: ${({ $textColor }) => $textColor || "#ffffff"};
+  background-color: ${({ theme, $topic }) => {
+    if ($topic === "Web Design") return theme.colors.orangeBg;
+    if ($topic === "Research") return theme.colors.greenBg;
+    if ($topic === "Copywriting") return theme.colors.purpleBg;
+    return theme.colors.grayBg;
+  }};
+
+  color: ${({ theme, $topic }) => {
+    if ($topic === "Web Design") return theme.colors.orange;
+    if ($topic === "Research") return theme.colors.green;
+    if ($topic === "Copywriting") return theme.colors.purple;
+    return theme.colors.textLight;
+  }};
+
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
@@ -186,10 +246,17 @@ export const CategoriesThemeItem = styled.button`
 
   cursor: pointer;
   opacity: ${({ $active }) => ($active ? "1" : "0.4")};
-  transition: opacity 0.2s;
+  transition:
+    opacity 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
 
   &:hover {
     opacity: 1;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
   }
 `;
 
@@ -197,7 +264,7 @@ export const ErrorText = styled.p`
   margin-top: 5px;
   margin-bottom: 10px;
 
-  color: red;
+  color: #ff4d4f;
   font-size: 12px;
 `;
 
@@ -206,22 +273,26 @@ export const CreateButton = styled.button`
   height: 30px;
   float: right;
 
-  border: none;
+  border: 0.7px solid ${({ theme }) => theme.colors.primary};
   border-radius: 4px;
-  background: #565eef;
+  background: ${({ theme }) => theme.colors.primary};
 
-  color: #ffffff;
+  color: ${({ theme }) => theme.colors.textLight};
   font-size: 14px;
   font-weight: 500;
 
   cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 
-  &:hover {
-    background: #33399b;
+  &:hover:not(:disabled) {
+    background: ${({ theme }) => theme.colors.primaryHover};
+    border-color: ${({ theme }) => theme.colors.primaryHover};
   }
 
   &:disabled {
-    background: #cccccc;
     cursor: not-allowed;
+    opacity: 0.7;
   }
 `;

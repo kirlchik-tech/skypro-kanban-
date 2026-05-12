@@ -1,31 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Calendar from "../Calendar/Calendar";
 import { useModal } from "../../context/ModalContext";
 import { useTasks } from "../../context/TaskContext";
 import * as S from "./PopNewCard.styled";
 
-const categories = [
-  { name: "Web Design", bgColor: "#FFE4C2", textColor: "#FF6D00" },
-  { name: "Research", bgColor: "#B4FDD1", textColor: "#06B16E" },
-  { name: "Copywriting", bgColor: "#E9D4FF", textColor: "#9A48F1" },
-];
+const categories = ["Web Design", "Research", "Copywriting"];
 
 const getErrorMessage = (err, defaultMessage) => {
-  if (err?.response?.data) {
-    if (typeof err.response.data === "string") {
-      return err.response.data;
-    }
-
-    if (err.response.data.message) {
-      return err.response.data.message;
-    }
-
-    if (err.response.data.error) {
-      return err.response.data.error;
-    }
+  if (typeof err?.response?.data === "string") {
+    return err.response.data;
   }
 
-  return err?.message || defaultMessage;
+  if (err?.response?.data?.message) {
+    return err.response.data.message;
+  }
+
+  if (err?.response?.data?.error) {
+    return err.response.data.error;
+  }
+
+  if (err?.message) {
+    return err.message;
+  }
+
+  return defaultMessage;
 };
 
 const PopNewCard = () => {
@@ -39,44 +37,48 @@ const PopNewCard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [titleError, setTitleError] = useState("");
+  const [descriptionError, setDescriptionError] = useState("");
+  const [dateError, setDateError] = useState("");
+
+  const resetForm = useCallback(() => {
+    setTitle("");
+    setDescription("");
+    setCategory("Web Design");
+    setSelectedDate(null);
+    setIsLoading(false);
+    setError("");
+    setTitleError("");
+    setDescriptionError("");
+    setDateError("");
+  }, []);
+
+  const handleClose = useCallback(() => {
+    resetForm();
+    closeNewCard();
+  }, [closeNewCard, resetForm]);
 
   useEffect(() => {
     const handleEsc = (event) => {
       if (event.key === "Escape" && isNewCardOpen) {
-        closeNewCard();
+        handleClose();
       }
     };
 
     window.addEventListener("keydown", handleEsc);
 
     return () => window.removeEventListener("keydown", handleEsc);
-  }, [isNewCardOpen, closeNewCard]);
+  }, [handleClose, isNewCardOpen]);
 
   if (!isNewCardOpen) return null;
 
-  const resetForm = () => {
-    setTitle("");
-    setDescription("");
-    setCategory("Web Design");
-    setSelectedDate(null);
-    setError("");
-    setTitleError("");
-  };
-
-  const handleClose = () => {
-    resetForm();
-    closeNewCard();
-  };
-
-  const handleDateSelect = (date) => {
-    setSelectedDate(date);
-  };
-
   const validateForm = () => {
     const trimmedTitle = title.trim();
+    const trimmedDescription = description.trim();
 
-    setTitleError("");
     setError("");
+    setTitleError("");
+    setDescriptionError("");
+    setDateError("");
 
     if (!trimmedTitle) {
       setTitleError("Введите название задачи");
@@ -90,6 +92,16 @@ const PopNewCard = () => {
 
     if (trimmedTitle.length > 100) {
       setTitleError("Название не должно превышать 100 символов");
+      return false;
+    }
+
+    if (!trimmedDescription) {
+      setDescriptionError("Введите описание задачи");
+      return false;
+    }
+
+    if (!selectedDate) {
+      setDateError("Выберите срок исполнения");
       return false;
     }
 
@@ -107,14 +119,11 @@ const PopNewCard = () => {
       topic: category,
       description: description.trim(),
       status: "Без статуса",
-      date: selectedDate
-        ? selectedDate.toISOString()
-        : new Date().toISOString(),
+      date: selectedDate.toISOString(),
     };
 
     try {
       await createTask(taskData);
-
       resetForm();
       closeNewCard();
     } catch (err) {
@@ -146,7 +155,7 @@ const PopNewCard = () => {
                     placeholder="Введите название задачи..."
                     value={title}
                     disabled={isLoading}
-                    style={{ borderColor: titleError ? "red" : undefined }}
+                    style={{ borderColor: titleError ? "#ff4d4f" : undefined }}
                     onChange={(event) => {
                       setTitle(event.target.value);
 
@@ -167,8 +176,21 @@ const PopNewCard = () => {
                     placeholder="Введите описание задачи..."
                     value={description}
                     disabled={isLoading}
-                    onChange={(event) => setDescription(event.target.value)}
+                    style={{
+                      borderColor: descriptionError ? "#ff4d4f" : undefined,
+                    }}
+                    onChange={(event) => {
+                      setDescription(event.target.value);
+
+                      if (descriptionError) {
+                        setDescriptionError("");
+                      }
+                    }}
                   />
+
+                  {descriptionError && (
+                    <S.ErrorText>{descriptionError}</S.ErrorText>
+                  )}
                 </S.PopNewCardFormBlock>
               </S.PopNewCardForm>
 
@@ -176,8 +198,16 @@ const PopNewCard = () => {
                 <Calendar
                   isEditable
                   selectedDate={selectedDate}
-                  onDateSelect={handleDateSelect}
+                  onDateSelect={(date) => {
+                    setSelectedDate(date);
+
+                    if (dateError) {
+                      setDateError("");
+                    }
+                  }}
                 />
+
+                {dateError && <S.ErrorText>{dateError}</S.ErrorText>}
               </S.CalendarWrapper>
             </S.PopNewCardMainContent>
 
@@ -185,16 +215,16 @@ const PopNewCard = () => {
               <S.Subttl>Категория</S.Subttl>
 
               <S.CategoriesThemes>
-                {categories.map((cat) => (
+                {categories.map((categoryName) => (
                   <S.CategoriesThemeItem
-                    key={cat.name}
+                    key={categoryName}
                     type="button"
-                    $active={category === cat.name}
-                    $bgColor={cat.bgColor}
-                    $textColor={cat.textColor}
-                    onClick={() => setCategory(cat.name)}
+                    $active={category === categoryName}
+                    $topic={categoryName}
+                    onClick={() => setCategory(categoryName)}
+                    disabled={isLoading}
                   >
-                    {cat.name}
+                    {categoryName}
                   </S.CategoriesThemeItem>
                 ))}
               </S.CategoriesThemes>

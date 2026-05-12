@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
 import { Wrapper } from "../components/common/Layout.styled";
 import Header from "../components/Header/Header";
 import Main from "../components/Main/Main";
@@ -8,6 +9,55 @@ import PopNewCard from "../components/PopNewCard/PopNewCard";
 import PopBrowse from "../components/PopBrowse/PopBrowse";
 import PopUser from "../components/PopUser/PopUser";
 import { useTasks } from "../context/TaskContext";
+
+const StateBlock = styled.div`
+  min-height: 60vh;
+  padding: 60px 20px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+
+  text-align: center;
+`;
+
+const StateTitle = styled.h2`
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+`;
+
+const StateText = styled.p`
+  max-width: 460px;
+
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.4;
+`;
+
+const RetryButton = styled.button`
+  min-width: 132px;
+  height: 36px;
+  padding: 0 18px;
+
+  border: none;
+  border-radius: 4px;
+  background: ${({ theme }) => theme.colors.primary};
+
+  color: ${({ theme }) => theme.colors.textLight};
+  font-size: 14px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.primaryHover};
+  }
+`;
 
 const MainPage = () => {
   const navigate = useNavigate();
@@ -33,22 +83,17 @@ const MainPage = () => {
       <Wrapper>
         <Header />
 
-        <div style={{ textAlign: "center", marginTop: "50px", color: "red" }}>
-          <p>{error}</p>
+        <StateBlock>
+          <StateTitle>Не удалось загрузить задачи</StateTitle>
+          <StateText>{error}</StateText>
 
-          <button
-            type="button"
-            onClick={loadTasksSafely}
-            style={{
-              marginTop: "10px",
-              padding: "8px 16px",
-              cursor: "pointer",
-            }}
-          >
+          <RetryButton type="button" onClick={loadTasksSafely}>
             Повторить
-          </button>
-        </div>
+          </RetryButton>
+        </StateBlock>
 
+        <PopNewCard />
+        <PopBrowse />
         <PopUser />
       </Wrapper>
     );
@@ -57,7 +102,20 @@ const MainPage = () => {
   return (
     <Wrapper>
       <Header />
-      {isLoading ? <Loader /> : <Main cards={cards} />}
+
+      {isLoading ? (
+        <Loader />
+      ) : cards.length > 0 ? (
+        <Main cards={cards} />
+      ) : (
+        <StateBlock>
+          <StateTitle>Новых задач нет</StateTitle>
+          <StateText>
+            Создайте первую задачу, чтобы она появилась на канбан-доске.
+          </StateText>
+        </StateBlock>
+      )}
+
       <PopNewCard />
       <PopBrowse />
       <PopUser />

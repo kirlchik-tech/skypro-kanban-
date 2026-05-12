@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useModal } from "../../context/ModalContext";
 import { useTasks } from "../../context/TaskContext";
 import * as S from "./PopBrowse.styled";
@@ -61,7 +61,6 @@ const getCalendarDays = (date) => {
   const month = date.getMonth();
   const firstMonthDay = new Date(year, month, 1);
   const daysInMonth = new Date(year, month + 1, 0).getDate();
-
   const firstWeekDayIndex = (firstMonthDay.getDay() + 6) % 7;
 
   const emptyDays = Array.from({ length: firstWeekDayIndex }, (_, index) => ({
@@ -84,27 +83,30 @@ const getCalendarDays = (date) => {
 };
 
 const getErrorMessage = (err, defaultMessage) => {
-  if (err?.response?.data) {
-    if (typeof err.response.data === "string") {
-      return err.response.data;
-    }
-
-    if (err.response.data.message) {
-      return err.response.data.message;
-    }
-
-    if (err.response.data.error) {
-      return err.response.data.error;
-    }
+  if (typeof err?.response?.data === "string") {
+    return err.response.data;
   }
 
-  return err?.message || defaultMessage;
+  if (err?.response?.data?.message) {
+    return err.response.data.message;
+  }
+
+  if (err?.response?.data?.error) {
+    return err.response.data.error;
+  }
+
+  if (err?.message) {
+    return err.message;
+  }
+
+  return defaultMessage;
 };
 
 const PopBrowse = () => {
   const { isBrowseOpen, closeBrowse, currentTask } = useModal();
   const { editTask, removeTask } = useTasks();
 
+  const [isEditMode, setIsEditMode] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("Без статуса");
@@ -114,7 +116,7 @@ const PopBrowse = () => {
   const [error, setError] = useState("");
   const [titleError, setTitleError] = useState("");
 
-  useEffect(() => {
+  const resetForm = useCallback(() => {
     if (!currentTask) return;
 
     const taskDate = normalizeDate(currentTask.date);
@@ -128,17 +130,27 @@ const PopBrowse = () => {
     setTitleError("");
   }, [currentTask]);
 
+  const handleClose = useCallback(() => {
+    setIsEditMode(false);
+    closeBrowse();
+  }, [closeBrowse]);
+
+  useEffect(() => {
+    resetForm();
+    setIsEditMode(false);
+  }, [resetForm]);
+
   useEffect(() => {
     const handleEsc = (event) => {
       if (event.key === "Escape" && isBrowseOpen) {
-        closeBrowse();
+        handleClose();
       }
     };
 
     window.addEventListener("keydown", handleEsc);
 
     return () => window.removeEventListener("keydown", handleEsc);
-  }, [isBrowseOpen, closeBrowse]);
+  }, [handleClose, isBrowseOpen]);
 
   const calendarDays = useMemo(() => getCalendarDays(viewDate), [viewDate]);
 
@@ -146,6 +158,7 @@ const PopBrowse = () => {
 
   const validateForm = () => {
     const trimmedTitle = title.trim();
+    const trimmedDescription = description.trim();
 
     setError("");
     setTitleError("");
@@ -165,12 +178,33 @@ const PopBrowse = () => {
       return false;
     }
 
+    if (!trimmedDescription) {
+      setError("Введите описание задачи");
+      return false;
+    }
+
+    if (!selectedDate) {
+      setError("Выберите срок исполнения");
+      return false;
+    }
+
     return true;
   };
 
+  const handleCancelEdit = () => {
+    resetForm();
+    setIsEditMode(false);
+  };
+
   const handleDateSelect = (date) => {
+    if (!isEditMode) return;
+
     setSelectedDate(date);
     setViewDate(date);
+
+    if (error) {
+      setError("");
+    }
   };
 
   const handlePrevMonth = () => {
@@ -198,14 +232,12 @@ const PopBrowse = () => {
       topic: currentTask.topic || "Web Design",
       description: description.trim(),
       status,
-      date: selectedDate
-        ? selectedDate.toISOString()
-        : currentTask.date || new Date().toISOString(),
+      date: selectedDate.toISOString(),
     };
 
     try {
       await editTask(currentTask._id, taskData);
-
+      setIsEditMode(false);
       closeBrowse();
     } catch (err) {
       setError(
@@ -217,18 +249,11 @@ const PopBrowse = () => {
   };
 
   const handleDelete = async () => {
-    const isConfirmed = window.confirm(
-      "Вы уверены, что хотите удалить эту задачу?",
-    );
-
-    if (!isConfirmed) return;
-
     setIsLoading(true);
     setError("");
 
     try {
       await removeTask(currentTask._id);
-
       closeBrowse();
     } catch (err) {
       setError(
@@ -244,24 +269,28 @@ const PopBrowse = () => {
   } ${viewDate.getFullYear()}`;
 
   return (
-    <S.PopBrowseContainer onMouseDown={closeBrowse}>
+    <S.PopBrowseContainer onMouseDown={handleClose}>
       <S.PopBrowseBlock onMouseDown={(event) => event.stopPropagation()}>
         <S.PopBrowseContent>
           <S.PopBrowseHeader>
-            <S.TitleInput
-              type="text"
-              placeholder="Название задачи"
-              value={title}
-              disabled={isLoading}
-              $hasError={Boolean(titleError)}
-              onChange={(event) => {
-                setTitle(event.target.value);
+            {isEditMode ? (
+              <S.TitleInput
+                type="text"
+                placeholder="Название задачи"
+                value={title}
+                disabled={isLoading}
+                $hasError={Boolean(titleError)}
+                onChange={(event) => {
+                  setTitle(event.target.value);
 
-                if (titleError) {
-                  setTitleError("");
-                }
-              }}
-            />
+                  if (titleError) {
+                    setTitleError("");
+                  }
+                }}
+              />
+            ) : (
+              <S.TitleText>{title || "Название задачи"}</S.TitleText>
+            )}
 
             <S.TopicTag $topic={currentTask.topic}>
               {currentTask.topic || "Web Design"}
@@ -275,18 +304,24 @@ const PopBrowse = () => {
           <S.StatusBlock>
             <S.Subttl>Статус</S.Subttl>
 
-            <S.StatusButtons>
-              {statuses.map((statusName) => (
-                <S.StatusButton
-                  type="button"
-                  key={statusName}
-                  disabled={isLoading}
-                  $active={status === statusName}
-                  onClick={() => setStatus(statusName)}
-                >
-                  {statusName}
+            <S.StatusButtons $isEditMode={isEditMode}>
+              {isEditMode ? (
+                statuses.map((statusName) => (
+                  <S.StatusButton
+                    type="button"
+                    key={statusName}
+                    disabled={isLoading}
+                    $active={status === statusName}
+                    onClick={() => setStatus(statusName)}
+                  >
+                    {statusName}
+                  </S.StatusButton>
+                ))
+              ) : (
+                <S.StatusButton type="button" disabled $active $readonly>
+                  {status}
                 </S.StatusButton>
-              ))}
+              )}
             </S.StatusButtons>
           </S.StatusBlock>
 
@@ -295,13 +330,25 @@ const PopBrowse = () => {
               <S.DescriptionBlock>
                 <S.Subttl htmlFor="task-description">Описание задачи</S.Subttl>
 
-                <S.DescriptionTextarea
-                  id="task-description"
-                  placeholder="Введите описание задачи..."
-                  value={description}
-                  disabled={isLoading}
-                  onChange={(event) => setDescription(event.target.value)}
-                />
+                {isEditMode ? (
+                  <S.DescriptionTextarea
+                    id="task-description"
+                    placeholder="Введите описание задачи..."
+                    value={description}
+                    disabled={isLoading}
+                    onChange={(event) => {
+                      setDescription(event.target.value);
+
+                      if (error) {
+                        setError("");
+                      }
+                    }}
+                  />
+                ) : (
+                  <S.DescriptionPreview>
+                    {description || "Описание задачи"}
+                  </S.DescriptionPreview>
+                )}
               </S.DescriptionBlock>
             </S.LeftColumn>
 
@@ -347,6 +394,8 @@ const PopBrowse = () => {
                       <S.CalendarDay
                         type="button"
                         key={calendarDay.key}
+                        disabled={!isEditMode}
+                        $isEditMode={isEditMode}
                         $selected={isSameDay(calendarDay.date, selectedDate)}
                         $today={isSameDay(calendarDay.date, new Date())}
                         onClick={() => handleDateSelect(calendarDay.date)}
@@ -369,30 +418,46 @@ const PopBrowse = () => {
 
           <S.ButtonGroup>
             <S.ButtonsLeft>
-              <S.SaveButton
-                type="button"
-                disabled={isLoading}
-                onClick={handleSave}
-              >
-                {isLoading ? "Сохранение..." : "Сохранить"}
-              </S.SaveButton>
+              {isEditMode ? (
+                <>
+                  <S.PrimaryButton
+                    type="button"
+                    disabled={isLoading}
+                    onClick={handleSave}
+                  >
+                    {isLoading ? "Сохранение..." : "Сохранить"}
+                  </S.PrimaryButton>
 
-              <S.CancelButton type="button" onClick={closeBrowse}>
-                Отменить
-              </S.CancelButton>
+                  <S.SecondaryButton
+                    type="button"
+                    disabled={isLoading}
+                    onClick={handleCancelEdit}
+                  >
+                    Отменить
+                  </S.SecondaryButton>
+                </>
+              ) : (
+                <S.SecondaryButton
+                  type="button"
+                  disabled={isLoading}
+                  onClick={() => setIsEditMode(true)}
+                >
+                  Редактировать задачу
+                </S.SecondaryButton>
+              )}
 
-              <S.DeleteButton
+              <S.SecondaryButton
                 type="button"
                 disabled={isLoading}
                 onClick={handleDelete}
               >
                 Удалить задачу
-              </S.DeleteButton>
+              </S.SecondaryButton>
             </S.ButtonsLeft>
 
-            <S.PopBrowseClose type="button" onClick={closeBrowse}>
+            <S.PrimaryButton type="button" onClick={handleClose}>
               Закрыть
-            </S.PopBrowseClose>
+            </S.PrimaryButton>
           </S.ButtonGroup>
         </S.PopBrowseContent>
       </S.PopBrowseBlock>

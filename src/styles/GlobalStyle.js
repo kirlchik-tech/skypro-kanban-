@@ -16,8 +16,12 @@ export const GlobalStyle = createGlobalStyle`
   body {
     width: 100%;
     height: 100%;
-    color: #000000;
+    color: ${({ theme }) => theme.colors.textPrimary};
     font-family: "Montserrat", "Roboto", Arial, Helvetica, sans-serif;
+    background-color: ${({ theme }) => theme.colors.bgMain};
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
   }
 
   a,
@@ -30,6 +34,7 @@ export const GlobalStyle = createGlobalStyle`
   ._btn {
     cursor: pointer;
     outline: none;
+    font-family: inherit;
   }
 
   ul li {

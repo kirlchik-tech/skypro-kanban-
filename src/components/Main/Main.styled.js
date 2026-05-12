@@ -2,7 +2,10 @@ import styled from "styled-components";
 
 export const MainContainer = styled.main`
   width: 100%;
+
   background-color: ${({ theme }) => theme.colors.bgMain};
+
+  transition: background-color 0.2s ease;
 `;
 
 export const MainBlock = styled.div`
@@ -17,6 +20,7 @@ export const MainBlock = styled.div`
 
 export const ContentWrapper = styled.div`
   width: 100%;
+
   display: flex;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.desktop}) {
