@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import Calendar from "../Calendar/Calendar";
 import { useModal } from "../../context/ModalContext";
 import { useTasks } from "../../context/TaskContext";
@@ -82,26 +83,31 @@ const PopNewCard = () => {
 
     if (!trimmedTitle) {
       setTitleError("Введите название задачи");
+      toast.warning("Введите название задачи");
       return false;
     }
 
     if (trimmedTitle.length < 3) {
       setTitleError("Название должно содержать минимум 3 символа");
+      toast.warning("Название должно содержать минимум 3 символа");
       return false;
     }
 
     if (trimmedTitle.length > 100) {
       setTitleError("Название не должно превышать 100 символов");
+      toast.warning("Название не должно превышать 100 символов");
       return false;
     }
 
     if (!trimmedDescription) {
       setDescriptionError("Введите описание задачи");
+      toast.warning("Введите описание задачи");
       return false;
     }
 
     if (!selectedDate) {
       setDateError("Выберите срок исполнения");
+      toast.warning("Выберите срок исполнения");
       return false;
     }
 
@@ -124,12 +130,18 @@ const PopNewCard = () => {
 
     try {
       await createTask(taskData);
+
+      toast.success("Задача успешно создана");
       resetForm();
       closeNewCard();
     } catch (err) {
-      setError(
-        getErrorMessage(err, "Ошибка создания задачи. Попробуйте снова."),
+      const message = getErrorMessage(
+        err,
+        "Ошибка создания задачи. Попробуйте снова.",
       );
+
+      setError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -155,7 +167,9 @@ const PopNewCard = () => {
                     placeholder="Введите название задачи..."
                     value={title}
                     disabled={isLoading}
-                    style={{ borderColor: titleError ? "#ff4d4f" : undefined }}
+                    style={{
+                      borderColor: titleError ? "#ff4d4f" : undefined,
+                    }}
                     onChange={(event) => {
                       setTitle(event.target.value);
 

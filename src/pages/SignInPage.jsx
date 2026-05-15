@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import * as S from "./Auth.styled";
 
 const getAuthErrorMessage = (err, fallbackMessage) => {
   if (err?.message === "Failed to fetch" || err instanceof TypeError) {
-    return "Ошибка сети. Проверьте подключение к интернету";
+    return "Сервер временно недоступен. Попробуйте позже.";
   }
 
   if (typeof err?.response?.data === "string") {
@@ -49,28 +50,44 @@ const SignInPage = () => {
     }
   };
 
-  const handleLogin = async (event) => {
-    event.preventDefault();
+  const validateForm = () => {
+    const trimmedLogin = login.trim();
+    const trimmedPassword = password.trim();
 
     setError("");
 
-    if (!login.trim()) {
+    if (!trimmedLogin) {
       setError("Введите логин");
-      return;
+      toast.warning("Введите логин");
+      return false;
     }
 
-    if (!password.trim()) {
+    if (!trimmedPassword) {
       setError("Введите пароль");
-      return;
+      toast.warning("Введите пароль");
+      return false;
     }
+
+    return true;
+  };
+
+  const handleLogin = async (event) => {
+    event.preventDefault();
+
+    if (!validateForm()) return;
 
     setIsLoading(true);
 
     try {
-      await loginUser(login, password);
+      await loginUser(login.trim(), password);
+
+      toast.success("Вы успешно вошли");
       navigate("/", { replace: true });
     } catch (err) {
-      setError(getAuthErrorMessage(err, "Неверный логин или пароль"));
+      const message = getAuthErrorMessage(err, "Неверный логин или пароль");
+
+      setError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }

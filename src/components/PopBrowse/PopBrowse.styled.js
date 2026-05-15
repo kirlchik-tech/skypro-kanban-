@@ -14,10 +14,6 @@ const getTopicBackground = (topic, theme) => {
 };
 
 const getTopicColor = (topic, theme) => {
-  if (theme.name === "dark") {
-    return theme.colors.textLight;
-  }
-
   switch (topic) {
     case "Web Design":
       return theme.colors.orange;
@@ -27,6 +23,23 @@ const getTopicColor = (topic, theme) => {
       return theme.colors.purple;
     default:
       return theme.colors.textSecondary;
+  }
+};
+
+const getReadonlyStatusWidth = (statusName) => {
+  switch (statusName) {
+    case "Без статуса":
+      return "111px";
+    case "Нужно сделать":
+      return "136px";
+    case "В работе":
+      return "91px";
+    case "Тестирование":
+      return "127px";
+    case "Готово":
+      return "77px";
+    default:
+      return "auto";
   }
 };
 
@@ -148,37 +161,9 @@ export const TopicTag = styled.div`
   font-weight: 600;
   line-height: 14px;
 
-  background-color: ${({ $topic }) => {
-    switch ($topic) {
-      case "Web Design":
-        return "#FFE4C2";
-      case "Research":
-        return "#B4FDD1";
-      case "Copywriting":
-        return "#E9D4FF";
-      default:
-        return "#EAEFF6";
-    }
-  }};
+  background-color: ${({ $topic, theme }) => getTopicBackground($topic, theme)};
 
-  color: ${({ $topic, theme }) => {
-    const isDarkTheme = theme.name === "dark";
-
-    if (isDarkTheme) {
-      return "rgba(255, 255, 255, 0.86)";
-    }
-
-    switch ($topic) {
-      case "Web Design":
-        return "#FF6D00";
-      case "Research":
-        return "#06B16E";
-      case "Copywriting":
-        return "#9A48F1";
-      default:
-        return "#94A6BE";
-    }
-  }};
+  color: ${({ $topic, theme }) => getTopicColor($topic, theme)};
 `;
 
 export const ErrorText = styled.p`

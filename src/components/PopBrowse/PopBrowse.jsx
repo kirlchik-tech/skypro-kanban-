@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
 import { useModal } from "../../context/ModalContext";
 import { useTasks } from "../../context/TaskContext";
 import * as S from "./PopBrowse.styled";
@@ -128,6 +129,7 @@ const PopBrowse = () => {
     setViewDate(taskDate || new Date());
     setError("");
     setTitleError("");
+    setIsLoading(false);
   }, [currentTask]);
 
   const handleClose = useCallback(() => {
@@ -165,26 +167,31 @@ const PopBrowse = () => {
 
     if (!trimmedTitle) {
       setTitleError("Введите название задачи");
+      toast.warning("Введите название задачи");
       return false;
     }
 
     if (trimmedTitle.length < 3) {
       setTitleError("Название должно содержать минимум 3 символа");
+      toast.warning("Название должно содержать минимум 3 символа");
       return false;
     }
 
     if (trimmedTitle.length > 100) {
       setTitleError("Название не должно превышать 100 символов");
+      toast.warning("Название не должно превышать 100 символов");
       return false;
     }
 
     if (!trimmedDescription) {
       setError("Введите описание задачи");
+      toast.warning("Введите описание задачи");
       return false;
     }
 
     if (!selectedDate) {
       setError("Выберите срок исполнения");
+      toast.warning("Выберите срок исполнения");
       return false;
     }
 
@@ -237,12 +244,18 @@ const PopBrowse = () => {
 
     try {
       await editTask(currentTask._id, taskData);
+
+      toast.success("Задача успешно сохранена");
       setIsEditMode(false);
       closeBrowse();
     } catch (err) {
-      setError(
-        getErrorMessage(err, "Ошибка сохранения задачи. Попробуйте снова."),
+      const message = getErrorMessage(
+        err,
+        "Ошибка сохранения задачи. Попробуйте снова.",
       );
+
+      setError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -254,11 +267,17 @@ const PopBrowse = () => {
 
     try {
       await removeTask(currentTask._id);
+
+      toast.success("Задача удалена");
       closeBrowse();
     } catch (err) {
-      setError(
-        getErrorMessage(err, "Ошибка удаления задачи. Попробуйте снова."),
+      const message = getErrorMessage(
+        err,
+        "Ошибка удаления задачи. Попробуйте снова.",
       );
+
+      setError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }

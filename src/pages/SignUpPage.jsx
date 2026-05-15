@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import * as S from "./Auth.styled";
 
 const getAuthErrorMessage = (err, fallbackMessage) => {
   if (err?.message === "Failed to fetch" || err instanceof TypeError) {
-    return "Ошибка сети. Проверьте подключение к интернету";
+    return "Сервер временно недоступен. Попробуйте позже.";
   }
 
   if (typeof err?.response?.data === "string") {
@@ -54,39 +55,56 @@ const SignUpPage = () => {
   const validateForm = () => {
     const trimmedLogin = login.trim();
     const trimmedName = name.trim();
+    const trimmedPassword = password.trim();
+    const trimmedConfirmPassword = confirmPassword.trim();
+
+    setError("");
 
     if (!trimmedLogin) {
       setError("Введите логин");
+      toast.warning("Введите логин");
       return false;
     }
 
     if (trimmedLogin.length < 3) {
       setError("Логин должен содержать минимум 3 символа");
+      toast.warning("Логин должен содержать минимум 3 символа");
       return false;
     }
 
     if (!trimmedName) {
       setError("Введите имя");
+      toast.warning("Введите имя");
       return false;
     }
 
     if (trimmedName.length < 2) {
       setError("Имя должно содержать минимум 2 символа");
+      toast.warning("Имя должно содержать минимум 2 символа");
       return false;
     }
 
-    if (!password) {
+    if (!trimmedPassword) {
       setError("Введите пароль");
+      toast.warning("Введите пароль");
       return false;
     }
 
-    if (password.length < 6) {
+    if (trimmedPassword.length < 6) {
       setError("Пароль должен содержать минимум 6 символов");
+      toast.warning("Пароль должен содержать минимум 6 символов");
+      return false;
+    }
+
+    if (!trimmedConfirmPassword) {
+      setError("Подтвердите пароль");
+      toast.warning("Подтвердите пароль");
       return false;
     }
 
     if (password !== confirmPassword) {
       setError("Пароли не совпадают");
+      toast.warning("Пароли не совпадают");
       return false;
     }
 
@@ -96,22 +114,23 @@ const SignUpPage = () => {
   const handleRegister = async (event) => {
     event.preventDefault();
 
-    setError("");
-
     if (!validateForm()) return;
 
     setIsLoading(true);
 
     try {
-      await register(login, name, password);
+      await register(login.trim(), name.trim(), password);
+
+      toast.success("Регистрация прошла успешно");
       navigate("/", { replace: true });
     } catch (err) {
-      setError(
-        getAuthErrorMessage(
-          err,
-          "Ошибка регистрации. Попробуйте другой логин.",
-        ),
+      const message = getAuthErrorMessage(
+        err,
+        "Ошибка регистрации. Попробуйте другой логин.",
       );
+
+      setError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
