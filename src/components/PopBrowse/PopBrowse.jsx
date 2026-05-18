@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useModal } from "../../context/ModalContext";
 import { useTasks } from "../../context/TaskContext";
@@ -104,8 +105,19 @@ const getErrorMessage = (err, defaultMessage) => {
 };
 
 const PopBrowse = () => {
+  const { id } = useParams();
+
   const { isBrowseOpen, closeBrowse, currentTask } = useModal();
-  const { editTask, removeTask } = useTasks();
+  const { cards, isLoading: isTasksLoading, editTask, removeTask } = useTasks();
+
+  const taskFromRoute = useMemo(() => {
+    return cards.find((card) => card._id === id);
+  }, [cards, id]);
+
+  const task =
+    currentTask?._id === id || currentTask?.id === id
+      ? currentTask
+      : taskFromRoute;
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [title, setTitle] = useState("");
@@ -118,19 +130,19 @@ const PopBrowse = () => {
   const [titleError, setTitleError] = useState("");
 
   const resetForm = useCallback(() => {
-    if (!currentTask) return;
+    if (!task) return;
 
-    const taskDate = normalizeDate(currentTask.date);
+    const taskDate = normalizeDate(task.date);
 
-    setTitle(currentTask.title || "");
-    setDescription(currentTask.description || "");
-    setStatus(currentTask.status || "Без статуса");
+    setTitle(task.title || "");
+    setDescription(task.description || "");
+    setStatus(task.status || "Без статуса");
     setSelectedDate(taskDate);
     setViewDate(taskDate || new Date());
     setError("");
     setTitleError("");
     setIsLoading(false);
-  }, [currentTask]);
+  }, [task]);
 
   const handleClose = useCallback(() => {
     setIsEditMode(false);
@@ -141,6 +153,13 @@ const PopBrowse = () => {
     resetForm();
     setIsEditMode(false);
   }, [resetForm]);
+
+  useEffect(() => {
+    if (isBrowseOpen && !isTasksLoading && !task) {
+      toast.error("Задача не найдена");
+      closeBrowse();
+    }
+  }, [isBrowseOpen, isTasksLoading, task, closeBrowse]);
 
   useEffect(() => {
     const handleEsc = (event) => {
@@ -156,7 +175,7 @@ const PopBrowse = () => {
 
   const calendarDays = useMemo(() => getCalendarDays(viewDate), [viewDate]);
 
-  if (!isBrowseOpen || !currentTask) return null;
+  if (!isBrowseOpen || !task) return null;
 
   const validateForm = () => {
     const trimmedTitle = title.trim();
@@ -236,14 +255,14 @@ const PopBrowse = () => {
 
     const taskData = {
       title: title.trim(),
-      topic: currentTask.topic || "Web Design",
+      topic: task.topic || "Web Design",
       description: description.trim(),
       status,
       date: selectedDate.toISOString(),
     };
 
     try {
-      await editTask(currentTask._id, taskData);
+      await editTask(task._id, taskData);
 
       toast.success("Задача успешно сохранена");
       setIsEditMode(false);
@@ -266,7 +285,7 @@ const PopBrowse = () => {
     setError("");
 
     try {
-      await removeTask(currentTask._id);
+      await removeTask(task._id);
 
       toast.success("Задача удалена");
       closeBrowse();
@@ -311,8 +330,8 @@ const PopBrowse = () => {
               <S.TitleText>{title || "Название задачи"}</S.TitleText>
             )}
 
-            <S.TopicTag $topic={currentTask.topic}>
-              {currentTask.topic || "Web Design"}
+            <S.TopicTag $topic={task.topic}>
+              {task.topic || "Web Design"}
             </S.TopicTag>
           </S.PopBrowseHeader>
 
@@ -331,13 +350,20 @@ const PopBrowse = () => {
                     key={statusName}
                     disabled={isLoading}
                     $active={status === statusName}
+                    $statusName={statusName}
                     onClick={() => setStatus(statusName)}
                   >
                     {statusName}
                   </S.StatusButton>
                 ))
               ) : (
-                <S.StatusButton type="button" disabled $active $readonly>
+                <S.StatusButton
+                  type="button"
+                  disabled
+                  $active
+                  $readonly
+                  $statusName={status}
+                >
                   {status}
                 </S.StatusButton>
               )}

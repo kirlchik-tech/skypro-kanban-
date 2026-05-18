@@ -1,37 +1,48 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const ModalContext = createContext(null);
 
+const modalRoutes = ["new-card", "exit", "login", "register", "404"];
+
 export const ModalProvider = ({ children }) => {
-  const [isNewCardOpen, setIsNewCardOpen] = useState(false);
-  const [isBrowseOpen, setIsBrowseOpen] = useState(false);
-  const [isExitOpen, setIsExitOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [currentTask, setCurrentTask] = useState(null);
 
+  const routeName = location.pathname.split("/").filter(Boolean)[0];
+
+  const isNewCardOpen = routeName === "new-card";
+  const isExitOpen = routeName === "exit";
+  const isBrowseOpen = Boolean(routeName) && !modalRoutes.includes(routeName);
+
   const openNewCard = () => {
-    setIsNewCardOpen(true);
+    navigate("/new-card");
   };
 
   const closeNewCard = () => {
-    setIsNewCardOpen(false);
+    navigate("/");
   };
 
   const openBrowse = (task) => {
+    if (!task?._id) return;
+
     setCurrentTask(task);
-    setIsBrowseOpen(true);
+    navigate(`/${task._id}`);
   };
 
   const closeBrowse = () => {
     setCurrentTask(null);
-    setIsBrowseOpen(false);
+    navigate("/");
   };
 
   const openExit = () => {
-    setIsExitOpen(true);
+    navigate("/exit");
   };
 
   const closeExit = () => {
-    setIsExitOpen(false);
+    navigate("/");
   };
 
   const value = useMemo(
