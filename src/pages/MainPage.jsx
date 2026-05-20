@@ -1,32 +1,87 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
+import styled from "styled-components";
 import { Wrapper } from "../components/common/Layout.styled";
 import Header from "../components/Header/Header";
 import Main from "../components/Main/Main";
 import Loader from "../components/Loader/Loader";
 import { useTasks } from "../context/TaskContext";
 
+const StateBlock = styled.div`
+  min-height: 60vh;
+  padding: 60px 20px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+
+  text-align: center;
+`;
+
+const StateTitle = styled.h2`
+  color: ${({ theme }) => theme.colors.textPrimary};
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.2;
+`;
+
+const StateText = styled.p`
+  max-width: 460px;
+
+  color: ${({ theme }) => theme.colors.textSecondary};
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.4;
+`;
+
+const RetryButton = styled.button`
+  min-width: 132px;
+  height: 36px;
+  padding: 0 18px;
+
+  border: none;
+  border-radius: 4px;
+  background: ${({ theme }) => theme.colors.primary};
+
+  color: ${({ theme }) => theme.colors.textLight};
+  font-size: 14px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.primaryHover};
+  }
+`;
+
 const MainPage = () => {
   const navigate = useNavigate();
 
-  const { cards, isLoading, error, loadTasks } = useTasks();
+  const { cards, isLoading, error, hasLoaded, loadTasks } = useTasks();
 
-  const loadTasksSafely = async () => {
-    try {
-      await loadTasks();
-    } catch (err) {
-      if (err?.response?.status === 401) {
-        navigate("/login", { replace: true });
+  const loadTasksSafely = useCallback(
+    async ({ force = false } = {}) => {
+      try {
+        await loadTasks({ force });
+      } catch (err) {
+        if (err?.response?.status === 401) {
+          navigate("/login", { replace: true });
+        }
       }
-    }
-  };
+    },
+    [loadTasks, navigate],
+  );
 
   useEffect(() => {
-    loadTasksSafely();
-  }, [loadTasks, navigate]);
+    if (!hasLoaded) {
+      loadTasksSafely();
+    }
+  }, [hasLoaded, loadTasksSafely]);
 
-  const handleRetry = async () => {
-    await loadTasksSafely();
+  const handleRetry = () => {
+    loadTasksSafely({ force: true });
   };
 
   if (error) {
@@ -34,21 +89,14 @@ const MainPage = () => {
       <Wrapper>
         <Header />
 
-        <div style={{ textAlign: "center", marginTop: "50px", color: "red" }}>
-          <p>{error}</p>
+        <StateBlock>
+          <StateTitle>Не удалось загрузить задачи</StateTitle>
+          <StateText>{error}</StateText>
 
-          <button
-            type="button"
-            onClick={handleRetry}
-            style={{
-              marginTop: "10px",
-              padding: "8px 16px",
-              cursor: "pointer",
-            }}
-          >
+          <RetryButton type="button" onClick={handleRetry}>
             Повторить
-          </button>
-        </div>
+          </RetryButton>
+        </StateBlock>
 
         <Outlet />
       </Wrapper>
@@ -58,7 +106,19 @@ const MainPage = () => {
   return (
     <Wrapper>
       <Header />
-      {isLoading ? <Loader /> : <Main cards={cards} />}
+
+      {isLoading ? (
+        <Loader />
+      ) : cards.length > 0 ? (
+        <Main cards={cards} />
+      ) : (
+        <StateBlock>
+          <StateTitle>Новых задач нет</StateTitle>
+          <StateText>
+            Создайте первую задачу, чтобы она появилась на канбан-доске.
+          </StateText>
+        </StateBlock>
+      )}
 
       <Outlet />
     </Wrapper>
